@@ -1,6 +1,15 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 4.2
+ - I am at section 5.1
+
+## Mathematical Notes ##
+
+### Sphere equation ###
+x^2 + y^2 + z^2 = r^2 for a sphere centered upon the origin, where (x, y, z) is a point on its surface. Accordingly, for a sphere with a center at point (Cx, Cy, Cz), r^2 = (Cx - x)^2 + (Cy - y)^2 + (Cz - z)^2.
+
+Vector from point P to center C is (C - P). (C - P) · (C - P) = (Cx - x)^2 + (Cy - y)^2 + (Cz - z)^2. Accordingly, r^2 = (C - P) · (C - P). Any point satisfying that equation is on the sphere.
+
+If a ray P(t) = Q + t \* d hits the sphere, there is a value of t satisfying the sphere equation given above. That means we need to look for (C - P(t)) · (C - P(t)) = r^2, or (C - (Q + t \* d)) · (C - (Q + t \* d)) = r^2. We can separate terms based on presence of a t: (-t \* d + (C - Q)) · (-t \* d + (C - Q)) = r^2. Then, we can distribute the dot product: t^2 \* d · d - 2t \* d · (C - Q) + (C - Q) · (C - Q) - r^2 = 0. The t can be solved for by quadratic equation, which gives that a = d · d, b = -2d · (C - Q), c = (C - Q) · (C - Q) - r^2. While algebraically its square root can be positive (2 real solutions), negative (no real solutions), or 0 (1 real solution), it relates to the geometry (0 roots is no intersection, 1 root is 1 intersection, 2 roots is 2 intersections).
 
 ## Structure of BMP file ##
  - Bitmap file header: 14 bytes

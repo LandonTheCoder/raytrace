@@ -8,19 +8,22 @@
 double hit_sphere(const point3 &center, double radius, const ray &r) {
     // oc is (C - Q)
     vec3 oc = center - r.origin();
+
     // a, b, c are the variables from quadratic equation.
-    auto a = dot(r.direction(), r.direction()); // d · d
-    auto b = -2.0 * dot(r.direction(), oc); // -2d · (C - Q)
+    // x.length_squared() is equivalent to x · x
+    auto a = r.direction().length_squared(); // d · d
+    auto h = dot(r.direction(), oc); // b but with -2 cancelled out.
     auto c = dot(oc, oc) - radius * radius; // (C - Q) · (C - Q) - r^2
     // The component inside the square root of quadratic equation.
-    auto discriminant = b * b - 4 * a * c;
+    // Note that (2b)^2 evaluates to 4b^2.
+    auto discriminant = h * h - a * c;
     // We square-root in order to normalize normal vector to the unit vector.
     // An outwards normal is direction of (P - C), so pointing out from center.
     if (discriminant < 0) {
         return -1.0;
     } else {
         // For now, we assume the closest hit point is desired.
-        return (-b - std::sqrt(discriminant)) / (2.0 * a);
+        return (h - std::sqrt(discriminant))/a;
     }
 }
 

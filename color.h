@@ -7,6 +7,10 @@
 
 using color = vec3;
 
+// To allow querying supported types at runtime. BMPOUT_TERMINATOR is to
+// determine the end of a supported_type_list.
+enum BitmapOutputType { BMPOUT_TERMINATOR, BMPOUT_PPM, BMPOUT_BMP, BMPOUT_PNG, BMPOUT_JPEG };
+
 /* Class for a RGB24 bitmap (R8G8B8).
  * Includes functions to serialize as a few different formats.
  * Note that the instantiated bitmap class must outlive any pointers to
@@ -43,6 +47,9 @@ class bitmap {
 
     // Writes out bitmap to BMP, written top-to-bottom order.
     void write_as_bmp_ttb(std::ostream &out);
+
+    // Returns a list of supported types.
+    static const BitmapOutputType * return_supported_types();
 
   private:
     /* Internal methods here. Internal methods are called by this->method(),

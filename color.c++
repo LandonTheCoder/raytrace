@@ -7,6 +7,11 @@
 // In case I want to printf()
 #include <cstdio>
 
+// I haven't implemented support for advanced formats yet.
+static const BitmapOutputType supported_types[] = {BMPOUT_PPM,
+                                                   BMPOUT_BMP,
+                                                   BMPOUT_TERMINATOR};
+
 // Global functions
 void write_color(std::ostream &out, const color &pixel_color) {
     auto r = pixel_color.x();
@@ -20,6 +25,10 @@ void write_color(std::ostream &out, const color &pixel_color) {
 
     // Write out the pixel color components.
     out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
+}
+
+const BitmapOutputType * bitmap::return_supported_types() {
+    return supported_types;
 }
 
 // Private functions for internal usage.

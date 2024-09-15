@@ -1,40 +1,15 @@
-#include "color.h"
-#include "ray.h"
-#include "vec3.h"
+#include "rtweekend.h"
+#include "hittable.h"
+#include "hittable-list.h"
+#include "sphere.h"
 
 #include <iostream>
 
-// Report a normal sphere hit point by math given in NOTES.md.
-double hit_sphere(const point3 &center, double radius, const ray &r) {
-    // oc is (C - Q)
-    vec3 oc = center - r.origin();
-
-    // a, b, c are the variables from quadratic equation.
-    // x.length_squared() is equivalent to x · x
-    auto a = r.direction().length_squared(); // d · d
-    auto h = dot(r.direction(), oc); // b but with -2 cancelled out.
-    auto c = dot(oc, oc) - radius * radius; // (C - Q) · (C - Q) - r^2
-    // The component inside the square root of quadratic equation.
-    // Note that (2b)^2 evaluates to 4b^2.
-    auto discriminant = h * h - a * c;
-    // We square-root in order to normalize normal vector to the unit vector.
-    // An outwards normal is direction of (P - C), so pointing out from center.
-    if (discriminant < 0) {
-        return -1.0;
-    } else {
-        // For now, we assume the closest hit point is desired.
-        return (h - std::sqrt(discriminant))/a;
-    }
-}
-
 // At a = 0 it is white, at a = 1.0 it is blue, blend in between.
-color ray_color(const ray &r) {
-    // Test a point at (0, 0, -1) and make intersecting pixels red.
-    auto t = hit_sphere(point3(0, 0, -1), 0.5, r);
-    if (t > 0.0) {
-        vec3 N = unit_vector(r.at(t) - vec3(0, 0, -1));
-        // Sphere hit colors are between -1 and 0.
-        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+color ray_color(const ray &r, const hittable &world) {
+    hit_record rec;
+    if (world.hit(r, 0, infinity, rec)) {
+        return 0.5 * (rec.normal + color(1.0, 1.0, 1.0));
     }
 
     vec3 unit_direction = unit_vector(r.direction());
@@ -53,6 +28,11 @@ int main() {
     // Calculate the image height, and ensure that it's at least 1.
     int image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
+
+    // World
+    hittable_list world;
+    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
+    world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
 
     // Camera
 
@@ -91,7 +71,7 @@ int main() {
             auto ray_direction = pixel_center - camera_center;
             ray r(camera_center, ray_direction);
 
-            color pixel_color = ray_color(r);
+            color pixel_color = ray_color(r, world);
             raw_bmp.write_pixel_vec3(j, i, pixel_color);
         }
     }

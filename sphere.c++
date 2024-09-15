@@ -29,7 +29,11 @@ bool sphere::hit(const ray &r, double ray_tmin, double ray_tmax, hit_record &rec
 
     rec.t = root;
     rec.p = r.at(rec.t);
-    rec.normal = (rec.p - center) / radius;
+    // I have to call a method so hit_record can store facing direction and
+    // normal. This is done so that facing direction is determined at
+    // geometry time.
+    vec3 outward_normal = (rec.p - center) / radius;
+    rec.set_face_normal(r, outward_normal);
 
     return true;
 }

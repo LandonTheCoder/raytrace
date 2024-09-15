@@ -10,6 +10,15 @@ class hit_record {
     vec3 normal;
     // The t-value which matches.
     double t;
+    // Is ray facing towards the front?
+    bool front_face;
+    void set_face_normal(const ray &r, const vec3 &outward_normal) {
+        // Set hit record normal vector (outward_normal is assumed to have
+        // unit length). Normals always point outwards when stored.
+        front_face = dot(r.direction(), outward_normal) < 0;
+        normal = front_face ? outward_normal : -outward_normal;
+    }
+
 };
 
 // Abstract class to support hittable objects.

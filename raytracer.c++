@@ -8,7 +8,7 @@
 // At a = 0 it is white, at a = 1.0 it is blue, blend in between.
 color ray_color(const ray &r, const hittable &world) {
     hit_record rec;
-    if (world.hit(r, 0, infinity, rec)) {
+    if (world.hit(r, interval(0, infinity), rec)) {
         return 0.5 * (rec.normal + color(1.0, 1.0, 1.0));
     }
 

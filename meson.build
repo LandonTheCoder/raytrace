@@ -1,4 +1,4 @@
 project('raytrace', 'c', 'cpp', version: '0.1')
 
 executable('ppm-example', 'ppm-example.c++', 'color.c++')
-executable('raytracer', 'raytracer.c++', 'color.c++', 'hittable-list.c++', 'sphere.c++')
+executable('raytracer', 'raytracer.c++', 'color.c++', 'hittable-list.c++', 'sphere.c++', 'interval.c++')

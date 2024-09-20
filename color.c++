@@ -6,6 +6,8 @@
 #include <iostream>
 // In case I want to printf()
 #include <cstdio>
+// For interval.clamp()
+#include "interval.h"
 
 // I haven't implemented support for advanced formats yet.
 static const BitmapOutputType supported_types[] = {BMPOUT_PPM,
@@ -14,6 +16,7 @@ static const BitmapOutputType supported_types[] = {BMPOUT_PPM,
 
 // Global functions
 void write_color(std::ostream &out, const color &pixel_color) {
+    std::clog << "Call to deprecated function write_color(), use bitmap class instead.\n";
     auto r = pixel_color.x();
     auto g = pixel_color.y();
     auto b = pixel_color.z();
@@ -82,9 +85,12 @@ void bitmap::write_pixel_vec3(int row, int column, const color &px_color) {
     auto g = px_color.y();
     auto b = px_color.z();
 
-    uint8_t rbyte = uint8_t(255.999 * r);
-    uint8_t gbyte = uint8_t(255.999 * g);
-    uint8_t bbyte = uint8_t(255.999 * b);
+    // We now do a clamped translation from [0.0, 1.0] to [0, 255]
+    static const interval intensity(0.000, 0.999);
+
+    uint8_t rbyte = uint8_t(256 * intensity.clamp(r));
+    uint8_t gbyte = uint8_t(256 * intensity.clamp(g));
+    uint8_t bbyte = uint8_t(256 * intensity.clamp(b));
 
     pixel_data[pixel_index] = rbyte;
     pixel_data[pixel_index + 1] = gbyte;

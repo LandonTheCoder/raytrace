@@ -21,8 +21,10 @@ int main() {
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
+    cam.samples_per_pixel = 100;
 
     // Note: +x is right, +y is up, +z is outwards relative to camera.
 
+    // Initializes camera, renders, writes a PPM to stdout. (Make it more flexible in the future.)
     cam.render(world);
 }

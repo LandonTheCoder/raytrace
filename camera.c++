@@ -87,7 +87,9 @@ color camera::ray_color(const ray &r, int depth, const hittable &world) {
         return color(0, 0, 0);
 
     hit_record rec;
-    if (world.hit(r, interval(0, infinity), rec)) {
+
+    // Ignore really close hits to hack around "shadow acne" problem
+    if (world.hit(r, interval(0.001, infinity), rec)) {
         vec3 direction = random_on_hemisphere(rec.normal);
         // This recurses until it either stops hitting something or exceeds recursion depth.
         return 0.5 * ray_color(ray(rec.p, direction), depth - 1, world);

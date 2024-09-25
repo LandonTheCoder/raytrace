@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 9.3
+ - I am at section 9.4
 
 ## Mathematical Notes ##
 
@@ -16,7 +16,7 @@ If a ray P(t) = Q + t \* d hits the sphere, there is a value of t satisfying the
 ### Diffuse Surfaces ###
 The addition of objects and multiple rays per pixel (which is done in a square which comes \[-.5, .5\] out from the pixel itself) allows making diffuse (matte) surfaces. We can make the material and geometry tightly bound, or separated (we pick separated for flexibility).
 
-Diffuse objects which don't emit their own light will take on the color of their surroundings, but it does take influence from the "intrinsic color" of the material surface. Light which reflects off has a randomized direction. (If 3 rays are sent into a crack in a diffuse surface, they will have different random behavior.) Light may also be absorbed instead of reflected, and as the surface gets darker, the likelihood of absorption gets higher. There needs to be a means to make sure that a random vector only gives results on the surface of a hemisphere, and the simplest is to reject invalid ones. It amounts to: Generate random vector inside unit sphere, normalize to sphere surface, invert normalized vector if in wrong hemisphere. If a ray bounces off a material and keeps 100% of color, it is white. If it bounces off and keeps 0% of color, it is black.
+Diffuse objects which don't emit their own light will take on the color of their surroundings, but it does take influence from the "intrinsic color" of the material surface. Light which reflects off has a randomized direction. (If 3 rays are sent into a crack in a diffuse surface, they will have different random behavior.) Light may also be absorbed instead of reflected, and as the surface gets darker, the likelihood of absorption gets higher. There needs to be a means to make sure that a random vector only gives results on the surface of a hemisphere, and the simplest is to reject invalid ones. It amounts to: Generate random vector inside unit sphere, normalize to sphere surface, invert normalized vector if in wrong hemisphere. If a ray bounces off a material and keeps 100% of color, it is white. If it bounces off and keeps 0% of color, it is black. Note that floating-point rounding errors can cause rays to be sent which aren't flush with the surface, and can erroneously intersect with it, causing color distortion. This problem is called "shadow acne".
 
 ## Programming Notes ##
 std::shared\_ptr\<T\> stores an automatically refcounted pointer, and safely (hopefully?) deletes it once refcount hits 0. A shared\_ptr is initialized by assigning to it with make\_shared<T>(arguments).

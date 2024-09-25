@@ -12,6 +12,7 @@ class camera {
     double aspect_ratio = 1.0; // Image width over height
     int image_width = 100; // This is a default image_width.
     int samples_per_pixel = 10; // Number of random samples per pixel.
+    int max_depth = 10; // Maximum ray bounces into scene (to limit recursion)
 
     void render(const hittable &world);
   private:
@@ -24,7 +25,7 @@ class camera {
     vec3 pixel_delta_v; // Offset to the next pixel down
 
     void initialize();
-    color ray_color(const ray &r, const hittable &world);
+    color ray_color(const ray &r, int depth, const hittable &world);
 
     ray get_ray(int i, int j);
     vec3 sample_square() const;

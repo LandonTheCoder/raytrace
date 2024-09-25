@@ -17,7 +17,7 @@ void camera::render(const hittable &world) {
             color pixel_color(0, 0, 0);
             for (int sample = 0; sample < samples_per_pixel; sample++) {
                 ray r = get_ray(i, j);
-                pixel_color += ray_color(r, world);
+                pixel_color += ray_color(r, max_depth, world);
             }
 
             raw_bmp.write_pixel_vec3(j, i, pixel_samples_scale * pixel_color);
@@ -81,12 +81,16 @@ vec3 camera::sample_square() const {
 }
 
 // At a = 0 it is white, at a = 1.0 it is blue, blend in between.
-color camera::ray_color(const ray &r, const hittable &world) {
+color camera::ray_color(const ray &r, int depth, const hittable &world) {
+    // Don't gather any more light if max depth is exceeded
+    if (depth <= 0)
+        return color(0, 0, 0);
+
     hit_record rec;
     if (world.hit(r, interval(0, infinity), rec)) {
         vec3 direction = random_on_hemisphere(rec.normal);
-        // Is this safe?
-        return 0.5 * ray_color(ray(rec.p, direction), world);
+        // This recurses until it either stops hitting something or exceeds recursion depth.
+        return 0.5 * ray_color(ray(rec.p, direction), depth - 1, world);
     }
 
     vec3 unit_direction = unit_vector(r.direction());

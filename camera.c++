@@ -84,7 +84,9 @@ vec3 camera::sample_square() const {
 color camera::ray_color(const ray &r, const hittable &world) {
     hit_record rec;
     if (world.hit(r, interval(0, infinity), rec)) {
-        return 0.5 * (rec.normal + color(1.0, 1.0, 1.0));
+        vec3 direction = random_on_hemisphere(rec.normal);
+        // Is this safe?
+        return 0.5 * ray_color(ray(rec.p, direction), world);
     }
 
     vec3 unit_direction = unit_vector(r.direction());

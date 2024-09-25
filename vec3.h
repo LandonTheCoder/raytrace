@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <iostream>
+// For random_double()
+#include "utils.h"
 
 class vec3 {
   public:
@@ -45,6 +47,17 @@ class vec3 {
 
     double length_squared() const {
         return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+    }
+
+    // These are used for generating random directions for diffuse objects.
+    static vec3 random() {
+        return vec3(random_double(), random_double(), random_double());
+    }
+
+    static vec3 random(double min, double max) {
+        return vec3(random_double(min, max),
+                    random_double(min, max),
+                    random_double(min, max));
     }
 };
 
@@ -95,4 +108,24 @@ inline vec3 cross(const vec3 &u, const vec3 &v) {
 
 inline vec3 unit_vector(const vec3 &v) {
     return v / v.length();
+}
+
+inline vec3 random_unit_vector() {
+    while (true) {
+        auto p = vec3::random(-1, 1);
+        auto len_squared = p.length_squared();
+
+        // Very small values of len_squared can underflow to 0, 10^-160 is smallest safe value.
+        if (1e-160 < len_squared && len_squared <= 1)
+            return p / sqrt(len_squared);
+    }
+}
+
+inline vec3 random_on_hemisphere(const vec3 &normal) {
+    vec3 on_unit_sphere = random_unit_vector();
+    // In same hemisphere as normal
+    if (dot(on_unit_sphere, normal) > 0.0)
+        return on_unit_sphere;
+    else
+        return -on_unit_sphere;
 }

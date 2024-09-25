@@ -11,6 +11,13 @@ Vector from point P to center C is (C - P). (C - P) · (C - P) = (Cx - x)^2 + (C
 
 If a ray P(t) = Q + t \* d hits the sphere, there is a value of t satisfying the sphere equation given above. That means we need to look for (C - P(t)) · (C - P(t)) = r^2, or (C - (Q + t \* d)) · (C - (Q + t \* d)) = r^2. We can separate terms based on presence of a t: (-t \* d + (C - Q)) · (-t \* d + (C - Q)) = r^2. Then, we can distribute the dot product: t^2 \* d · d - 2t \* d · (C - Q) + (C - Q) · (C - Q) - r^2 = 0. The t can be solved for by quadratic equation, which gives that a = d · d, b = -2d · (C - Q), c = (C - Q) · (C - Q) - r^2. While algebraically its square root can be positive (2 real solutions), negative (no real solutions), or 0 (1 real solution), it relates to the geometry (0 roots is no intersection, 1 root is 1 intersection, 2 roots is 2 intersections).
 
+## Surface/Materials Notes ##
+
+### Diffuse Surfaces ###
+The addition of objects and multiple rays per pixel (which is done in a square which comes \[-.5, .5\] out from the pixel itself) allows making diffuse (matte) surfaces. We can make the material and geometry tightly bound, or separated (we pick separated for flexibility).
+
+Diffuse objects which don't emit their own light will take on the color of their surroundings, but it does take influence from the "intrinsic color" of the material surface. Light which reflects off has a randomized direction. (If 3 rays are sent into a crack in a diffuse surface, they will have different random behavior.) Light may also be absorbed instead of reflected, and as the surface gets darker, the likelihood of absorption gets higher. There needs to be a means to make sure that a random vector only gives results on the surface of a hemisphere, and the simplest is to reject invalid ones. It amounts to: Generate random vector inside unit sphere, normalize to sphere surface, invert normalized vector if in wrong hemisphere. If a ray bounces off a material and keeps 100% of color, it is white. If it bounces off and keeps 0% of color, it is black.
+
 ## Programming Notes ##
 std::shared\_ptr\<T\> stores an automatically refcounted pointer, and safely (hopefully?) deletes it once refcount hits 0. A shared\_ptr is initialized by assigning to it with make\_shared<T>(arguments).
 

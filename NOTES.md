@@ -11,6 +11,9 @@ Vector from point P to center C is (C - P). (C - P) · (C - P) = (Cx - x)^2 + (C
 
 If a ray P(t) = Q + t \* d hits the sphere, there is a value of t satisfying the sphere equation given above. That means we need to look for (C - P(t)) · (C - P(t)) = r^2, or (C - (Q + t \* d)) · (C - (Q + t \* d)) = r^2. We can separate terms based on presence of a t: (-t \* d + (C - Q)) · (-t \* d + (C - Q)) = r^2. Then, we can distribute the dot product: t^2 \* d · d - 2t \* d · (C - Q) + (C - Q) · (C - Q) - r^2 = 0. The t can be solved for by quadratic equation, which gives that a = d · d, b = -2d · (C - Q), c = (C - Q) · (C - Q) - r^2. While algebraically its square root can be positive (2 real solutions), negative (no real solutions), or 0 (1 real solution), it relates to the geometry (0 roots is no intersection, 1 root is 1 intersection, 2 roots is 2 intersections).
 
+### Lambertian distribution ###
+Lambertian distribution is a more accurate way to implement diffuse surfaces. It scatters reflected rays in a manner proportional to cos(ϕ), with ϕ as the angle between reflected ray and surface normal. In other words, a ray is most likely to scatter in a direction near surface normal, and less in directions away from it. It can be created by adding a random unit vector to the normal vector. With hit point as p and normal vector as n, there are 2 sides at that intersection, so there are 2 tangent unit spheres displaced from surface by length of radius (1 for unit sphere). 1 is displaced in direction of normal (n) and 1 is displaced towards -n. There are spheres touching surface centered at (P + n) and (P - n), where (P - n) is inside surface and (P + n) is outside. We pick a point S on the unit sphere on the outside, and send a ray from P to S (vector (S - P)).
+
 ## Surface/Materials Notes ##
 
 ### Diffuse Surfaces ###

@@ -135,3 +135,9 @@ inline vec3 random_on_hemisphere(const vec3 &normal) {
     else
         return -on_unit_sphere;
 }
+
+inline vec3 reflect(const vec3 &v, const vec3 &n) {
+    // The direction of a reflected ray is (v + 2b), where n is unit vector but v may not be.
+    // Vec v points into surface, b points out, so there is a negation (hence - instead of +).
+    return v - 2 * dot(v, n) * n;
+}

@@ -4,6 +4,8 @@
 #include "color.h"
 // For random_double()
 #include "utils.h"
+// For material to scatter
+#include "material.h"
 
 void camera::render(const hittable &world) {
     initialize();
@@ -90,9 +92,12 @@ color camera::ray_color(const ray &r, int depth, const hittable &world) {
 
     // Ignore really close hits to hack around "shadow acne" problem
     if (world.hit(r, interval(0.001, infinity), rec)) {
-        vec3 direction = rec.normal + random_unit_vector();
-        // This recurses until it either stops hitting something or exceeds recursion depth.
-        return 0.1 * ray_color(ray(rec.p, direction), depth - 1, world);
+        ray scattered;
+        color attenuation;
+        // Recurse until it stops hitting something or exceeds max depth.
+        if (rec.mat->scatter(r, rec, attenuation, scattered))
+            return attenuation * ray_color(scattered, depth - 1, world);
+        return color(0, 0, 0);
     }
 
     vec3 unit_direction = unit_vector(r.direction());

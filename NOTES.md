@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 10.4
+ - I am at section 10.6
 
 ## Mathematical Notes ##
 

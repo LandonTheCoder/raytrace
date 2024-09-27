@@ -8,6 +8,8 @@
 #include <cstdio>
 // For interval.clamp()
 #include "interval.h"
+// For std::sqrt()
+#include <cmath>
 
 // I haven't implemented support for advanced formats yet.
 static const BitmapOutputType supported_types[] = {BMPOUT_PPM,
@@ -32,6 +34,13 @@ void write_color(std::ostream &out, const color &pixel_color) {
 
 const BitmapOutputType * bitmap::return_supported_types() {
     return supported_types;
+}
+
+// Internal function
+static inline double linear_to_gamma(double linear_component) {
+    if (linear_component > 0)
+        return std::sqrt(linear_component);
+    return 0;
 }
 
 // Private functions for internal usage.
@@ -80,10 +89,11 @@ void bitmap::write_pixel_vec3(int row, int column, const color &px_color) {
         return;
     }
 
-    // This is stored in floating-point format
-    auto r = px_color.x();
-    auto g = px_color.y();
-    auto b = px_color.z();
+    // This is stored in floating-point format, but needs gamma correction.
+    // Linear -> Gamma 2
+    auto r = linear_to_gamma(px_color.x());
+    auto g = linear_to_gamma(px_color.y());
+    auto b = linear_to_gamma(px_color.z());
 
     // We now do a clamped translation from [0.0, 1.0] to [0, 255]
     static const interval intensity(0.000, 0.999);

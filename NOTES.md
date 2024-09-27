@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 9.4
+ - I am at section 9.5
 
 ## Mathematical Notes ##
 
@@ -13,6 +13,11 @@ If a ray P(t) = Q + t \* d hits the sphere, there is a value of t satisfying the
 
 ### Lambertian distribution ###
 Lambertian distribution is a more accurate way to implement diffuse surfaces. It scatters reflected rays in a manner proportional to cos(ϕ), with ϕ as the angle between reflected ray and surface normal. In other words, a ray is most likely to scatter in a direction near surface normal, and less in directions away from it. It can be created by adding a random unit vector to the normal vector. With hit point as p and normal vector as n, there are 2 sides at that intersection, so there are 2 tangent unit spheres displaced from surface by length of radius (1 for unit sphere). 1 is displaced in direction of normal (n) and 1 is displaced towards -n. There are spheres touching surface centered at (P + n) and (P - n), where (P - n) is inside surface and (P + n) is outside. We pick a point S on the unit sphere on the outside, and send a ray from P to S (vector (S - P)).
+
+### Gamma Correction ###
+Gamma correction is a transform applied before writing a pixel value. A linear space means an image without any gamma correction, and gamma space is one with that correction applied. In our case, the lack of that correction causes it to be irrealistically dark.
+
+We are applying a "gamma 2" correction, meaning a correction to exponent 1/gamma (in this case 1/2 or square root) for linear to gamma. (It would be to exponent gamma or squaring to go from gamma to linear.) That results in a more consistent change of color.
 
 ## Surface/Materials Notes ##
 

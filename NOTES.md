@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 10.6
+ - I am at section 11.1
 
 ## Mathematical Notes ##
 
@@ -25,6 +25,9 @@ We are applying a "gamma 2" correction, meaning a correction to exponent 1/gamma
 The addition of objects and multiple rays per pixel (which is done in a square which comes \[-.5, .5\] out from the pixel itself) allows making diffuse (matte) surfaces. We can make the material and geometry tightly bound, or separated (we pick separated for flexibility).
 
 Diffuse objects which don't emit their own light will take on the color of their surroundings, but it does take influence from the "intrinsic color" of the material surface. Light which reflects off has a randomized direction. (If 3 rays are sent into a crack in a diffuse surface, they will have different random behavior.) Light may also be absorbed instead of reflected, and as the surface gets darker, the likelihood of absorption gets higher. There needs to be a means to make sure that a random vector only gives results on the surface of a hemisphere, and the simplest is to reject invalid ones. It amounts to: Generate random vector inside unit sphere, normalize to sphere surface, invert normalized vector if in wrong hemisphere. If a ray bounces off a material and keeps 100% of color, it is white. If it bounces off and keeps 0% of color, it is black. Note that floating-point rounding errors can cause rays to be sent which aren't flush with the surface, and can erroneously intersect with it, causing color distortion. This problem is called "shadow acne".
+
+### Metal Surfaces ###
+Metals, of course, reflect differently. We can randomize the direction of reflection by using a small sphere and choosing a new endpoint for the ray. We use a random point from surface of a sphere centered on original endpoint, which is scaled by "fuzz factor". As the "fuzz sphere" gets bigger, the reflections get fuzzier. (We can simply add a fuzziness parameter corresponding to radius of fuzz sphere, with 0 meaning no distortion.) However, for big spheres it could scatter below the surface (in which case it should be absorbed). It also has to be scaled consistently compared to reflection vector (which can arbitrarily vary in length), which means normalizing reflected ray.
 
 ## Material Types ##
 We are using an abstract class for materials to implement flexibility more easily. It needs to support producing a scattered ray, and say how much to attenuate it (if scattered).

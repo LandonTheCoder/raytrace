@@ -37,6 +37,18 @@ std::shared\_ptr\<T\> stores an automatically refcounted pointer, and safely (ho
 
 std::vector\<T\> stores a collection of a specified type in a list that grows automatically.
 
+## Ideas for Expansion ##
+ - Of course, refactor to better control output.
+ - Instead of writing a bunch of spaces, use ANSI escape sequences to clear the line.
+   - "\x0D" or "\r" is CR, goes to beginning of line
+   - "\x1B" or "\e" or "\033" is Escape character
+   - "\x1B[0K" (or "\033[0K") clears the current line (from cursor to end)
+   - "\x1B[1K" (or "\033[1K") clears the current line (from beginning to cursor)
+   - "\x1B[2K" (or "\033[2K") clears line (from beginning to end)
+   - Enabling on Windows: See [Microsoft Documentation](https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences)
+   - The line-clearing "Done" string can be: "\r\033[0KDone.\n"
+ - Make sure stdout works correctly on Windows (may require enabling binary mode). See [_setmode()](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setmode)
+
 ## Structure of BMP file ##
  - Bitmap file header: 14 bytes
    - addr 0x00: i16 type = {'B', 'M'}

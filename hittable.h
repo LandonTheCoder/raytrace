@@ -2,6 +2,11 @@
 
 #include "ray.h"
 #include "interval.h"
+// For std::shared_ptr
+#include <memory>
+
+
+class material;
 
 class hit_record {
   public:
@@ -11,6 +16,8 @@ class hit_record {
     vec3 normal;
     // The t-value which matches.
     double t;
+    // Material type, which can implement scattering in different ways.
+    std::shared_ptr<material> mat;
     // Is ray facing towards the front?
     bool front_face;
     void set_face_normal(const ray &r, const vec3 &outward_normal) {

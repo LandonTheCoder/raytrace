@@ -1,6 +1,8 @@
 #pragma once
 #include "hittable.h"
 #include "vec3.h"
+// For std::shared_ptr
+#include <memory>
 
 class sphere: public hittable {
   public:
@@ -12,4 +14,5 @@ class sphere: public hittable {
   private:
     point3 center;
     double radius;
+    std::shared_ptr<material> mat; // To be initialized
 };

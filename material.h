@@ -48,4 +48,7 @@ class dielectric: public material {
   private:
     // Refractive index in vacuum or air, or ratio of refractive index over that of enclosing media.
     double refraction_index;
+
+    // Approximate value of reflectance for a given angle
+    static double reflectance(double cosine, double refraction_index);
 };

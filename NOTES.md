@@ -34,6 +34,8 @@ Clear materials (like water, glass, diamond) are dielectrics. When a light ray h
 
 Refraction is described by Snell's Law: η · sin(Θ) = η' · sin(Θ'), where η (eta, U+3B7) is refractive index and Θ is angle from normal. To find direction of refracted ray, solve for sin(Θ'), so sin(Θ') = (η/η') · sin(Θ). On refracted side of surface, there is a refracted ray R', a normal n', and an angle Θ' between them. We can split R' into parts perp. to n' and parallel to n'. We find that R' perpendicular is (η/η')(R + cos(Θ) * n), and that R' parallel is -sqrt(1 - |R' perp.|^2 * n). Everything except cos(Θ) is known, and dot product is magnitude of 2 vectors times the angle between them, so if the 2 vectors are unit vectors, the dot product is cos(Θ). Now, R' perp. is (η/η')(R + (-R · n)*n).
 
+There can be ray angles for which refraction doesn't work and it must be reflected. As an example, with ray inside glass with air on outside (η = 1.5 and η' = 1.0), that can potentially result in a broken equation because it would make sin(Θ') greater than 1. In that scenario, it must reflect. In the scenario where all light is reflected, it is called total internal reflection, and is why water-air boundary can act as a perfect mirror when underwater sometimes. We reflect if ri * sin\_theta \> 1.0, and can solve for sin\_theta by sin(Θ) = sqrt(1 - cos(Θ)^2) and cos(Θ) = R · n.
+
 ## Material Types ##
 We are using an abstract class for materials to implement flexibility more easily. It needs to support producing a scattered ray, and say how much to attenuate it (if scattered).
 

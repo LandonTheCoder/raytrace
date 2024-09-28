@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 11.1
+ - I am at section 11.3
 
 ## Mathematical Notes ##
 
@@ -28,6 +28,11 @@ Diffuse objects which don't emit their own light will take on the color of their
 
 ### Metal Surfaces ###
 Metals, of course, reflect differently. We can randomize the direction of reflection by using a small sphere and choosing a new endpoint for the ray. We use a random point from surface of a sphere centered on original endpoint, which is scaled by "fuzz factor". As the "fuzz sphere" gets bigger, the reflections get fuzzier. (We can simply add a fuzziness parameter corresponding to radius of fuzz sphere, with 0 meaning no distortion.) However, for big spheres it could scatter below the surface (in which case it should be absorbed). It also has to be scaled consistently compared to reflection vector (which can arbitrarily vary in length), which means normalizing reflected ray.
+
+### Dielectric Surfaces ###
+Clear materials (like water, glass, diamond) are dielectrics. When a light ray hits them, it splits into a reflected ray and a refracted ray. We handle it by randomly choosing which we perform, and only scatter 1 ray per interaction. A reflected ray hits and bounces off, while a refracted ray bends once it enters the material. How much it bends is determined by the refractive index (which is a number, where higher values refract more). For a transparent object within another transparent object, use relative refractive index (inner index/outer index).
+
+Refraction is described by Snell's Law: η · sin(Θ) = η' · sin(Θ'), where η (eta, U+3B7) is refractive index and Θ is angle from normal. To find direction of refracted ray, solve for sin(Θ'), so sin(Θ') = (η/η') · sin(Θ). On refracted side of surface, there is a refracted ray R', a normal n', and an angle Θ' between them. We can split R' into parts perp. to n' and parallel to n'. We find that R' perpendicular is (η/η')(R + cos(Θ) * n), and that R' parallel is -sqrt(1 - |R' perp.|^2 * n). Everything except cos(Θ) is known, and dot product is magnitude of 2 vectors times the angle between them, so if the 2 vectors are unit vectors, the dot product is cos(Θ). Now, R' perp. is (η/η')(R + (-R · n)*n).
 
 ## Material Types ##
 We are using an abstract class for materials to implement flexibility more easily. It needs to support producing a scattered ray, and say how much to attenuate it (if scattered).

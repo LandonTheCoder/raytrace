@@ -14,6 +14,8 @@ class camera {
     int samples_per_pixel = 10; // Number of random samples per pixel.
     int max_depth = 10; // Maximum ray bounces into scene (to limit recursion)
 
+    double vfov = 90; // Vertical view angle/field of view (in degrees)
+
     void render(const hittable &world);
   private:
     // Place private camera variables here.

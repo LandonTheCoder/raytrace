@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 13.1
+ - I am at section 13.2
 
 ## Mathematical Notes ##
 
@@ -41,6 +41,11 @@ We are using an abstract class for materials to implement flexibility more easil
 
 ## Camera Notes ##
 To implement adjustable camera, we would have to have a place to look from, and a place to look at. We also need a vector to define camera rotation (called the "view up" vector), which must not be parallel to camera view direction. We have a vector u pointing to camera's right, vector v pointing to camera's up, vector w pointing opposite of view direction, with camera center at origin.
+
+## Defocus Blur (Depth of Field) Notes ##
+Defocus blur (often called "Depth of Field" in photography) is an effect in photography which comes from the need to have a larger lens, and is how there is a region "in focus" while other areas are "out of focus". The distance between the lens and the area where everything is in focus is the "focus distance".
+
+Usually, instead of fully simulating a full sensor-lens-aperture combination and all of the complexities, raytracers usually use a "thin lens" approximation. That means that we start rays from an infinitely thin circular lens, and send them towards the pixel of interest. The viewport has to be placed on this plane for convenience purposes.
 
 ## Programming Notes ##
 std::shared\_ptr\<T\> stores an automatically refcounted pointer, and safely (hopefully?) deletes it once refcount hits 0. A shared\_ptr is initialized by assigning to it with make\_shared<T>(arguments).

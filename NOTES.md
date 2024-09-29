@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 12.1
+ - I am at section 13.1
 
 ## Mathematical Notes ##
 
@@ -38,6 +38,9 @@ There can be ray angles for which refraction doesn't work and it must be reflect
 
 ## Material Types ##
 We are using an abstract class for materials to implement flexibility more easily. It needs to support producing a scattered ray, and say how much to attenuate it (if scattered).
+
+## Camera Notes ##
+To implement adjustable camera, we would have to have a place to look from, and a place to look at. We also need a vector to define camera rotation (called the "view up" vector), which must not be parallel to camera view direction. We have a vector u pointing to camera's right, vector v pointing to camera's up, vector w pointing opposite of view direction, with camera center at origin.
 
 ## Programming Notes ##
 std::shared\_ptr\<T\> stores an automatically refcounted pointer, and safely (hopefully?) deletes it once refcount hits 0. A shared\_ptr is initialized by assigning to it with make\_shared<T>(arguments).

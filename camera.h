@@ -15,6 +15,9 @@ class camera {
     int max_depth = 10; // Maximum ray bounces into scene (to limit recursion)
 
     double vfov = 90; // Vertical view angle/field of view (in degrees)
+    point3 lookfrom = point3(0, 0, 0); // Point which camera looks from
+    point3 lookat = point3(0, 0, -1); // Point which camera looks at
+    vec3 vup = vec3(0, 1, 0); // Camera-relative "up" direction
 
     void render(const hittable &world);
   private:
@@ -25,6 +28,7 @@ class camera {
     point3 pixel00_loc; // Location of pixel (0, 0)
     vec3 pixel_delta_u; // Offset to the next pixel to the right
     vec3 pixel_delta_v; // Offset to the next pixel down
+    vec3 u, v, w; // Frame-basis vectors for camera
 
     void initialize();
     color ray_color(const ray &r, int depth, const hittable &world);

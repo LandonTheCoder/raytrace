@@ -14,10 +14,10 @@ No unique options currently. I highly suggest you supply a buildtype option or i
 Even the debugoptimized buildtype reduced image generation time from 51 seconds to 12.7 seconds (as of Ch. 13.2). The release buildtype brought it down to 12.5 seconds. Minsize resulted in 14.4 seconds on my system, so it may not make as much sense for you (because it won't do some things that can increase size like loop unrolling).
 
 ### Speed Test: Final version ###
-The file has 500 samples per pixel, at 1200×675 px.
+The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
 
- - plain (No options): (Untested currently)
- - debug (-O0 -g): (Untested currently)
+ - plain (No options): 15 hours 24 minutes 6.34 seconds
+ - debug (-O0 -g): 15 hours 24 minutes 6.32 seconds
  - debugoptimized (-O2 -g): 2 hours 9 minutes 35.94 seconds
  - release (-O3): 2 hours 9 minutes 6.97 seconds
  - minsize (-Os -g): 2 hours 14 minutes 6.38 seconds

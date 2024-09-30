@@ -1,6 +1,7 @@
 # Ray Tracing in One Weekend #
 ## Progress ##
- - I am at section 13.2
+ - I am at section 14 (I have finished!)
+ - I plan to work on enhancements once I finish generating my reference images.
 
 ## Mathematical Notes ##
 

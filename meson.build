@@ -1,4 +1,8 @@
-project('raytrace', 'c', 'cpp', version: '1.0')
+project('raytrace', 'c', 'cpp', default_options: ['cpp_std=c++11'], license: 'MIT', version: '1.0')
 
+# The files implementing the raytracer internals
+rt_main_files = ['bitmap.c++', 'camera.c++', 'hittable-list.c++', 'interval.c++', 'material.c++', 'sphere.c++']
+
+# I don't need most of this stuff for ppm-example, just link the necessary ones.
 executable('ppm-example', 'ppm-example.c++', 'bitmap.c++', 'interval.c++')
-executable('raytracer', 'raytracer.c++', 'bitmap.c++', 'hittable-list.c++', 'material.c++', 'sphere.c++', 'interval.c++', 'camera.c++')
+executable('raytracer', 'raytracer.c++', rt_main_files)

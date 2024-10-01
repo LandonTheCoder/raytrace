@@ -1,10 +1,15 @@
 #pragma once
-// This contains functions to work around Windows quirks like not having ANSI escapes
-// by default, or "\n" -> "\r\n" replacement on stdout.
+// This contains functions to work around OS quirks like Windows not having
+// ANSI escapes by default, or "\n" -> "\r\n" replacement on stdout.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Sets locale correctly. This ensures a locale other than the "C" locale,
+ * and on Windows ensures UTF-8 locale if possible.
+ */
+int ensure_locale(void);
 
 /* Enables ANSI escapes if available.
  * Returns 0 if successful (or no-op on Unix-like systems),

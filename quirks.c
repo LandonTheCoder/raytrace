@@ -1,3 +1,9 @@
+// This contains per-OS functions to handle quirks.
+
+// OS-agnostic includes
+// For setlocale()
+#include <locale.h>
+
 #ifdef _WIN32
 // FormatMessage(), LocalFree(), GetStdHandle(), GetConsoleMode(), SetConsoleMode(), GetLastError()
 #include <windows.h>
@@ -9,9 +15,13 @@
 #include <fcntl.h>
 #include <io.h>
 
+// Utility functions
+
+// This converts an integer error to a string error and logs it.
 static void print_win_err(const char *func_name, int32_t err) {
-    LPVOID msg_buf, display_buf;
-    // FormatMessage(DWORD flags, LPCVOID src, DWORD msg_id, DWORD lang_id, LPTSTR buf, DWORD size, ...)
+    LPTSTR msg_buf, display_buf;
+    // FormatMessage(DWORD flags, LPCVOID src, DWORD msg_id, DWORD lang_id,
+    //               LPTSTR buf (out), DWORD size, ...)
     FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                   FORMAT_MESSAGE_FROM_SYSTEM |
                   FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -21,11 +31,21 @@ static void print_win_err(const char *func_name, int32_t err) {
                   (LPTSTR) &msg_buf, 0, NULL);
     // msg_buf is a wchar_t * if UNICODE is defined, else char *.
 #ifdef UNICODE
-    wprintf(L"%s failed with error %i: %s\n", func_name, err, msg_buf);
+    // %ls means wchar_t *str, %s means char *str
+    fwprintf(stderr, L"%s failed with error %i: %ls\n", func_name, err, msg_buf);
 #else
-    printf("%s failed with error %i: %s\n", func_name, err, msg_buf);
+    fprintf(stderr, "%s failed with error %i: %s\n", func_name, err, msg_buf);
 #endif
     LocalFree(msg_buf);
+}
+
+// Exported functions
+
+// Returns 0 if fully successful
+int ensure_locale(void) {
+    // Like setlocale(LC_ALL, ""), but also ensures UTF-8 locale for Windows on UCRT.
+    setlocale(LC_ALL, ".UTF-8");
+    return 0;
 }
 
 // Obviously, just return 0 if running on Unix-like OS. Use ifdefs for that.
@@ -65,6 +85,12 @@ void fix_stdout(void) {
 
 #else
 // We should be on a Unix-like system here, so these can be no-ops.
+int ensure_locale(void) {
+    // UTF-8 locale is assumed on Unix-like systems
+    setlocale(LC_ALL, "");
+    return 0;
+}
+
 int enable_vt_escapes(void) {
     return 0;
 }

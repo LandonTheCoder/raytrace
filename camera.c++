@@ -1,7 +1,7 @@
 #include "camera.h"
 #include <iostream>
 // For bitmap class
-#include "color.h"
+#include "bitmap.h"
 // For random_double()
 #include "utils.h"
 // For material to scatter

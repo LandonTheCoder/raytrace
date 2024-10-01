@@ -5,6 +5,7 @@
 #include "hittable-list.h"
 #include "material.h"
 #include "sphere.h"
+#include "bitmap.h"
 
 #include <iostream>
 

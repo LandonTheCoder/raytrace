@@ -1,15 +1,43 @@
 #include "rtweekend.h"
 
+// Camera is responsible for doing a render, given the set parameters.
 #include "camera.h"
+// hit_record and hittable abstract base class
 #include "hittable.h"
+// List of hittable objects.
 #include "hittable-list.h"
+// Includes the types of material
 #include "material.h"
+// The sphere (which is currently the only hittable)
 #include "sphere.h"
+// For bitmap class
 #include "bitmap.h"
+// For struct args and argument parser.
+#include "args.h"
+// OS-specific workarounds/quirks
+#include "quirks.h"
 
 #include <iostream>
+// For std::ofstream
+#include <fstream>
 
-int main() {
+int main(int argl, char **args) {
+    // Setup quirks to help ensure the environment
+    int locale_is_good = ensure_locale();
+    // This *should* make sure Windows doesn't clobber binary files written to std::cout.
+    fix_stdout();
+
+    struct args pargs = parse_args(argl, args);
+
+    // We open file here so errors with opening are found early.
+    std::ofstream out_file;
+    if (pargs.fname != nullptr) {
+        // Binary is to keep Windows from changing 0x0A to {0x0D, 0x0A} in a binary file
+        // Check if fname is UTF-8 on (current builds of) Windows.
+        out_file.open(pargs.fname, std::ios_base::out
+                                   | std::ios_base::binary
+                                   | std::ios_base::trunc);
+    }
 
     // Image size settings are now in camera.h and camera.c++
 
@@ -64,7 +92,7 @@ int main() {
     cam.image_width = 1200;
     // Note: This is a really high quality setting that makes it take forever.
     // It was at 100 previously, perhaps 50 would be good for testing?
-    cam.samples_per_pixel = 500;
+//    cam.samples_per_pixel = 500;
     cam.max_depth = 50;
 
     // PoV settings
@@ -82,5 +110,13 @@ int main() {
     // Initializes camera, renders, writes a PPM to stdout. (Make it more flexible in the future.)
     auto raw_bmp = cam.render(world);
 
-    raw_bmp.write_as_ppm(std::cout);
+    // This is a trick to avoid writing the code twice for stdout and a file.
+    std::ostream &outstream = (pargs.fname != nullptr)? out_file : std::cout;
+
+    if (pargs.ftype == BMPOUT_PPM) {
+        raw_bmp.write_as_ppm(outstream);
+    } else if (pargs.ftype == BMPOUT_BMP) {
+        // The officially preferred way to write BMP is bottom-to-top row order.
+        raw_bmp.write_as_bmp_btt(outstream);
+    }
 }

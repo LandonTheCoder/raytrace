@@ -131,6 +131,7 @@ struct args parse_args(int argl, char **args) {
                 else {
                     print_help(true, args[0]);
                     std::clog << "Unrecognized extension on file " << sv << '\n';
+                    exit(1);
                 }
             }
         }
@@ -145,6 +146,7 @@ struct args parse_args(int argl, char **args) {
             else {
                 print_help(true, args[0]);
                 std::clog << "Unrecognized file type: " << type_name << '\n';
+                exit(1);
             }
         }
     }

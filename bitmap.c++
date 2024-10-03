@@ -11,6 +11,16 @@
 // For std::sqrt()
 #include <cmath>
 
+// Determine what formats are supported.
+#include "config.h"
+
+// Optional formats included here.
+#ifdef ENABLE_PNG
+#include <png.h>
+// Needed for setjmp()/longjmp(), used for error handling.
+#include <csetjmp>
+#endif
+
 // I haven't implemented support for advanced formats yet. I hope to do PNG first.
 
 // Global functions
@@ -25,6 +35,11 @@ bool bitmap::type_is_supported(BitmapOutputType filetype) {
         break;
       // Insert optional types here. If supported, the code to return true is
       // included. Otherwise, it isn't (falling back to false).
+#ifdef ENABLE_PNG
+      case BMPOUT_PNG:
+        return true;
+        break;
+#endif
       default:
         return false;
         break;
@@ -212,3 +227,84 @@ void bitmap::write_as_bmp_btt(std::ostream &out) {
         out.write(padding, padding_size);
     }
 }
+
+// Writes out a PNG (support is optional)
+#ifdef ENABLE_PNG
+
+static void png_write_callback(png_structp png_ptr, png_bytep data, png_size_t len) {
+    std::ostream *out_ptr = (std::ostream *)png_get_io_ptr(png_ptr);
+    std::ostream &out = *out_ptr;
+
+    out.write(reinterpret_cast<char *>(data), len);
+}
+
+static void png_flush_callback(png_structp png_ptr) {
+    std::ostream *out_ptr = (std::ostream *)png_get_io_ptr(png_ptr);
+    (*out_ptr) << std::flush;
+}
+
+void bitmap::write_as_png(std::ostream &out) {
+    // Implement the real thing here.
+    // Determine which args are necessary.
+    // With typedef void (*)(png_structp, png_const_charp) err_fn_t:
+    // png_create_write_struct(char *verstring, void *err_ptr, err_fn_t err_fn, err_fn_t warn_fn)
+    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
+                                                  nullptr,
+                                                  nullptr,
+                                                  nullptr);
+    if (!png_ptr) {
+        std::clog << "Failed to initialize libpng writer\n";
+        return;
+    }
+
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        png_destroy_write_struct(&png_ptr, png_infopp(NULL));
+        std::clog << "Failed to initialize libpng info structure\n";
+        return;
+    }
+
+    // They make me use setjmp/longjmp() for error handling :(
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        // Error occurred
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        std::clog << "Something happened while writing the PNG file.\n";
+        return;
+    }
+
+    png_set_write_fn(png_ptr, png_voidp(&out), png_write_callback, png_flush_callback);
+
+    png_set_IHDR(png_ptr,
+                 info_ptr,
+                 image_width,
+                 image_height,
+                 8, // Bits per channel
+                 PNG_COLOR_TYPE_RGB, // 8bpc means 24bpp
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
+
+    // Start here?
+    // Write header data
+    png_write_info(png_ptr, info_ptr);
+    // It takes different "row pointers". png_bytep is unsigned char *
+    png_bytep row_pointers[image_height];
+
+    if (image_height > PNG_UINT_32_MAX / sizeof(png_bytep))
+        png_error(png_ptr, "Image is too tall to process in memory");
+
+    for (int index = 0; index < image_height; index++) {
+        row_pointers[index] = pixel_data + index * image_width * 3;
+    }
+
+    png_write_image(png_ptr, row_pointers);
+
+    png_write_end(png_ptr, info_ptr);
+
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+}
+#else
+void bitmap::write_as_png(std::ostream &out) {
+    return;
+}
+#endif

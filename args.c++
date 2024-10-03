@@ -13,6 +13,7 @@
 
 // Prints help
 static void print_help(bool is_err, char *progname) {
+    bool png_supported = bitmap::type_is_supported(BMPOUT_PNG);
     char help_str[] =
 "\npositional arguments:\n"
 "  FILE                  Specifies file to output to (defaults to stdout if\n"
@@ -20,13 +21,15 @@ static void print_help(bool is_err, char *progname) {
 "                        not specified.\n"
 "\noptional arguments:\n"
 "  -h, --help            show this help message and exit\n"
-"  -t TYPE, --type TYPE  Set output file type (options: ppm, bmp). If stdout is\n"
-"                        specified, default to ppm format\n";
+"  -t TYPE, --type TYPE  Set output file type. If stdout is specified, default\n"
+"                        to ppm format. (Options: bmp, ppm";
 
-    if (is_err)
-        std::clog << "usage: " << progname << " [-h] [-t TYPE] [FILE]\n" << help_str;
-    else
-        std::cout << "usage: " << progname << " [-h] [-t TYPE] [FILE]\n" << help_str;
+    std::ostream &output = is_err? std::clog : std::cout;
+
+    output << "usage: " << progname << " [-h] [-t TYPE] [FILE]\n" << help_str;
+    if (png_supported)
+        output << ", png";
+    output << ")\n";
 }
 
 // Case-insensitive "ends with" checking, needed to match extensions without using a regex.
@@ -128,7 +131,14 @@ struct args parse_args(int argl, char **args) {
                     parsed_args.ftype = BMPOUT_BMP;
                 else if (iendswith(sv, ".ppm"sv))
                     parsed_args.ftype = BMPOUT_PPM;
-                else {
+                else if (iendswith(sv, ".png"sv)) {
+                    parsed_args.ftype = BMPOUT_PNG;
+                    if (!bitmap::type_is_supported(BMPOUT_PNG)) {
+                        print_help(true, args[0]);
+                        std::clog << "PNG support not built in.\n";
+                        exit(4);
+                    }
+                } else {
                     print_help(true, args[0]);
                     std::clog << "Unrecognized extension on file " << sv << '\n';
                     exit(1);
@@ -143,7 +153,14 @@ struct args parse_args(int argl, char **args) {
                 parsed_args.ftype = BMPOUT_BMP;
             else if (type_name == "ppm"sv)
                 parsed_args.ftype = BMPOUT_PPM;
-            else {
+            else if (type_name == "png"sv) {
+                parsed_args.ftype = BMPOUT_PNG;
+                if (!bitmap::type_is_supported(BMPOUT_PNG)) {
+                    print_help(true, args[0]);
+                    std::clog << "PNG support not built in.\n";
+                    exit(4);
+                }
+            } else {
                 print_help(true, args[0]);
                 std::clog << "Unrecognized file type: " << type_name << '\n';
                 exit(1);

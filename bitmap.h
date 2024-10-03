@@ -54,6 +54,9 @@ class bitmap {
     // Writes out bitmap to BMP, written bottom-to-top (standard) order.
     void write_as_bmp_btt(std::ostream &out);
 
+    // Writes out bitmap to a PNG (with default settings). Not implemented.
+    void write_as_png(std::ostream &out);
+
     // Returns whether a type is supported.
     static bool type_is_supported(BitmapOutputType filetype);
 

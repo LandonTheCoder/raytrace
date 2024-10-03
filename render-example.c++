@@ -81,6 +81,8 @@ int main(int argl, char **args) {
         raw_bmp.write_as_ppm(outstream);
     } else if (pargs.ftype == BMPOUT_BMP) {
         raw_bmp.write_as_bmp_btt(outstream);
+    } else if (pargs.ftype == BMPOUT_PNG) {
+        raw_bmp.write_as_png(outstream);
     }
 
     if (vt_escape_status == 0) {

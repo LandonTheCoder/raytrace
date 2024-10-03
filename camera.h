@@ -4,6 +4,8 @@
 #include "ray.h"
 #include "hittable.h"
 #include "color.h"
+// To allow returning a bitmap
+#include "bitmap.h"
 
 class camera {
   public:
@@ -23,7 +25,7 @@ class camera {
     double defocus_angle = 0; // Variation angle of rays through each pixel
     double focus_dist = 10; // Distance from camera's lookfrom to plane of perfect focus
 
-    void render(const hittable &world);
+    bitmap render(const hittable &world);
   private:
     // Place private camera variables here.
     int image_height; // Rendered image height

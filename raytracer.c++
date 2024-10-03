@@ -80,5 +80,7 @@ int main() {
     // Note: +x is right, +y is up, +z is outwards relative to camera.
 
     // Initializes camera, renders, writes a PPM to stdout. (Make it more flexible in the future.)
-    cam.render(world);
+    auto raw_bmp = cam.render(world);
+
+    raw_bmp.write_as_ppm(std::cout);
 }

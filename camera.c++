@@ -10,7 +10,7 @@
 // For OS-specific workarounds/quirks
 #include "quirks.h"
 
-void camera::render(const hittable &world) {
+bitmap camera::render(const hittable &world) {
     initialize();
 
     // Returns 0 if success/no-op, -1 if unavailable, positive error otherwise
@@ -32,7 +32,6 @@ void camera::render(const hittable &world) {
             raw_bmp.write_pixel_vec3(j, i, pixel_samples_scale * pixel_color);
         }
     }
-    raw_bmp.write_as_ppm(std::cout);
 
     if (vt_escape_status == 0) {
         // Looks nicer. This clears cursor to end of line.
@@ -41,6 +40,8 @@ void camera::render(const hittable &world) {
         // Fallback output if ANSI escapes are unavailable.
         std::clog << "\rDone.                 \n";
     }
+
+    return raw_bmp;
 }
 
 // Initialize variables

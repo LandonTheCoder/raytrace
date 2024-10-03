@@ -45,6 +45,8 @@ static void print_win_err(const char *func_name, int32_t err) {
 int ensure_locale(void) {
     // Like setlocale(LC_ALL, ""), but also ensures UTF-8 locale for Windows on UCRT.
     setlocale(LC_ALL, ".UTF-8");
+    // I determine ACP to know whether Meson defaults to ACP=UTF-8
+    printf("Active codepage is: %s\n", GetACP());
     return 0;
 }
 

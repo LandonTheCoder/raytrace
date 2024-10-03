@@ -23,4 +23,6 @@ The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
  - minsize (-Os -g): 2 hours 14 minutes 6.38 seconds
 
 ## Enhancements ##
-Currently, my sole enhancement is the framework to be able to support more image formats in the future (which isn't utilized). I plan to reorganize the code slightly such that main() can determine which output format is used. I will also allow making the program output to a file specified on the command line, and picking file types. In the immediate term, I will implement PPM and BMP (BMP is fairly easy to do), and I plan to implement PNG and JPEG using external libraries. If no arguments are provided, default to printing a PPM image to stdout (which is safe on all platforms).
+I have enhanced it so that it can take arguments specifying an output file, supporting PPM, BMP, and (optionally) PNG. I hope to support JPEG in the future.
+
+I have some quirks to help support Windows, but it isn't tested on Windows.

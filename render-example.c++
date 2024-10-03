@@ -4,6 +4,8 @@
 #include "interval.h"
 // For struct args, parse_args()
 #include "args.h"
+// For testing workarounds/quirks
+#include "quirks.h"
 
 #include <iostream>
 // For std::ofstream
@@ -34,6 +36,12 @@ struct rgb color_vec3_to_rgb(const color &pixel_color) {
 
 // This is like ppm-example but not hardcoded for ppm to stdout.
 int main(int argl, char **args) {
+    // Testing quirks.
+    int locale_is_good = ensure_locale();
+    // Returns 0 if success/no-op, -1 if unavailable, positive error code otherwise.
+    int vt_escape_status = enable_vt_escapes();
+    fix_stdout();
+
     struct args pargs = parse_args(argl, args);
 
     std::ofstream out_file;
@@ -75,7 +83,11 @@ int main(int argl, char **args) {
         raw_bmp.write_as_bmp_btt(outstream);
     }
 
-//    raw_bmp.write_as_ppm(std::cout);
-    // Insert something better here?
-    std::clog << "\rDone.                 \n";
+    if (vt_escape_status == 0) {
+        // Looks nicer.
+        std::clog << "\r\033[0KDone.\n";
+    } else {
+        // Fallback output.
+        std::clog << "\rDone.                 \n";
+    }
 }

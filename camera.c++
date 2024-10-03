@@ -7,8 +7,15 @@
 // For material to scatter
 #include "material.h"
 
+// For OS-specific workarounds/quirks
+#include "quirks.h"
+
 void camera::render(const hittable &world) {
     initialize();
+
+    // Returns 0 if success/no-op, -1 if unavailable, positive error otherwise
+    int vt_escape_status = enable_vt_escapes();
+
     // Fill in with code from main()
     auto raw_bmp = bitmap(image_width, image_height);
 
@@ -27,8 +34,13 @@ void camera::render(const hittable &world) {
     }
     raw_bmp.write_as_ppm(std::cout);
 
-    // Insert something better here?
-    std::clog << "\rDone.                 \n";
+    if (vt_escape_status == 0) {
+        // Looks nicer. This clears cursor to end of line.
+        std::clog << "\r\033[0KDone.\n";
+    } else {
+        // Fallback output if ANSI escapes are unavailable.
+        std::clog << "\rDone.                 \n";
+    }
 }
 
 // Initialize variables

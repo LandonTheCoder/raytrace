@@ -11,15 +11,24 @@
 // For std::sqrt()
 #include <cmath>
 
-// I haven't implemented support for advanced formats yet.
-static const BitmapOutputType supported_types[] = {BMPOUT_PPM,
-                                                   BMPOUT_BMP,
-                                                   BMPOUT_TERMINATOR};
+// I haven't implemented support for advanced formats yet. I hope to do PNG first.
 
 // Global functions
 
-const BitmapOutputType * bitmap::return_supported_types() {
-    return supported_types;
+bool bitmap::type_is_supported(BitmapOutputType filetype) {
+    switch (filetype) {
+      case BMPOUT_PPM:
+        return true;
+        break;
+      case BMPOUT_BMP:
+        return true;
+        break;
+      // Insert optional types here. If supported, the code to return true is
+      // included. Otherwise, it isn't (falling back to false).
+      default:
+        return false;
+        break;
+    }
 }
 
 // Internal function

@@ -54,8 +54,8 @@ class bitmap {
     // Writes out bitmap to BMP, written bottom-to-top (standard) order.
     void write_as_bmp_btt(std::ostream &out);
 
-    // Returns a list of supported types.
-    static const BitmapOutputType * return_supported_types();
+    // Returns whether a type is supported.
+    static bool type_is_supported(BitmapOutputType filetype);
 
   private:
     // Internal and immutable data here.

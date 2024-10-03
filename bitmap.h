@@ -16,9 +16,6 @@ enum BitmapOutputType { BMPOUT_TERMINATOR, BMPOUT_PPM, BMPOUT_BMP, BMPOUT_PNG, B
  */
 class bitmap {
   public:
-    int image_width;
-    int image_height;
-    int raw_size;
     // Goes from left-to-right, top-to-bottom, in RGB order (8 bpc, 24bpp)
     uint8_t *pixel_data;
 
@@ -34,6 +31,14 @@ class bitmap {
         delete pixel_data;
     }
 
+    int get_image_width() {
+        return image_width;
+    }
+
+    int get_image_height() {
+        return image_height;
+    }
+
     // Row and column index starting from 0.
     void write_pixel_rgb(int row, int column, uint8_t r, uint8_t g, uint8_t b);
 
@@ -46,10 +51,18 @@ class bitmap {
     // Writes out bitmap to BMP, written top-to-bottom order.
     void write_as_bmp_ttb(std::ostream &out);
 
+    // Writes out bitmap to BMP, written bottom-to-top (standard) order.
+    void write_as_bmp_btt(std::ostream &out);
+
     // Returns a list of supported types.
     static const BitmapOutputType * return_supported_types();
 
   private:
+    // Internal and immutable data here.
+    int image_width;
+    int image_height;
+    int raw_size;
+
     /* Internal methods here. Internal methods are called by this->method(),
      * or simply by method() (no reference to object).
      */

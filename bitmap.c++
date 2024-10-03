@@ -155,3 +155,51 @@ void bitmap::write_as_bmp_ttb(std::ostream &out) {
         }
     }
 }
+
+// Writes out bitmap to BMP, written bottom-to-top order.
+void bitmap::write_as_bmp_btt(std::ostream &out) {
+    int new_row_multiple = image_width * 3;
+    // To be used as padding with padding_size
+    char padding[3] = {0, 0, 0};
+    int padding_size = new_row_multiple % 4;
+    // It is padded to 4 bytes
+    int filled_row_size = new_row_multiple + padding_size;
+
+    int bmp_pxtable_size = filled_row_size * image_height;
+    int bmp_file_size = bmp_pxtable_size + sizeof(struct bmp_header);
+    struct bmp_header hdr = {.type = 0x4d42, .bmp_size = bmp_file_size,
+                             .reserved_1 = 0, .reserved_2 = 0,
+                             .pixel_offset = 0x36, // Size of header
+                             .hdr_size = 40, // Size of subheader
+                             .pixel_width = image_width,
+                             // Positive image height causes it to be read bottom-to-top
+                             .pixel_height = image_height,
+                             .color_planes = 1, .bpp = 24,
+                             .compression_method = BI_RGB,
+                             .raw_image_size = bmp_pxtable_size,
+                             // px/m, 3780 px/m is approx. 96 px/in
+                             .horiz_dpm = 3780, .vert_dpm = 3780,
+                             .color_palette_size = 0, // All colors
+                             .num_important_colors = 0 // Unimportant
+                            };
+    // Write header as raw binary data
+    out.write(reinterpret_cast<char *>(&hdr), sizeof(hdr));
+
+    int top_row = new_row_multiple * (image_height - 1);
+    // Future idea: write a full row at a time, buffered beforehand.
+
+    for (int row_index = top_row; row_index > 0; row_index -= new_row_multiple) {
+        // We iterate forward through the row, but rows count backwards.
+        for (int offset = 0; offset < new_row_multiple; offset += 3) {
+            int index = row_index + offset;
+            // Reverse order of pixel colors
+            uint8_t pxbuf[3] = {pixel_data[index + 2],
+                                pixel_data[index + 1],
+                                pixel_data[index]};
+
+            out.write(reinterpret_cast<char *>(pxbuf), 3);
+        }
+        // Since row is finished, write padding
+        out.write(padding, padding_size);
+    }
+}

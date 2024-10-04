@@ -9,7 +9,7 @@ The basic gist of what I'm doing is:
 This is based on the Ray Tracing in One Weekend tutorial, with a few modifications added for flexibility (such as modifying it so that it can output to formats other than PPM, with room for expansion).
 
 ## Build Options ##
-I have 1 option: the "png" feature, which enables/disables libpng support (to enable writing PNG files). I will use options to allow picking optional features (like image-format support).
+I have 2 options: the "png" feature, which enables/disables libpng support (to enable writing PNG files), and the "jpeg" feature, which enables/disables libjpeg/libjpeg-turbo support (which enables writing JPEG files). I will use options to allow picking optional features (like image-format support).
 
 I highly suggest you supply a buildtype option or it will be painfully slow. By default, it uses "--buildtype debug" which provides no optimization options at all. I highly suggest using either the debugoptimized buildtype (equivalent to -O2 -g), the release buildtype (equivalent to -O3), or maybe minsize if you are space/cache-constrained (equivalent to -Os -g).
 
@@ -25,6 +25,6 @@ The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
  - minsize (-Os -g): 2 hours 14 minutes 6.38 seconds
 
 ## Enhancements ##
-I have enhanced it so that it can take arguments specifying an output file, supporting PPM, BMP, and (optionally) PNG. I hope to support JPEG in the future.
+I have enhanced it so that it can take arguments specifying an output file, supporting PPM, BMP, and (optionally) PNG and JPEG.
 
 I have some quirks to help support Windows, but it isn't tested on Windows.

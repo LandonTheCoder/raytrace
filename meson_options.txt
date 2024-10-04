@@ -1,1 +1,2 @@
-option('png', type: 'feature', description: 'Enable PNG support')
+option('png', type: 'feature', description: 'Enable PNG support (via libpng)')
+option('jpeg', type: 'feature', description: 'Enable JPEG support (via libjpeg-turbo)')

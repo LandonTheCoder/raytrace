@@ -92,7 +92,7 @@ int main(int argl, char **args) {
     cam.image_width = 1200;
     // Note: This is a really high quality setting that makes it take forever.
     // It was at 100 previously, perhaps 50 would be good for testing?
-//    cam.samples_per_pixel = 500;
+    cam.samples_per_pixel = 500;
     cam.max_depth = 50;
 
     // PoV settings
@@ -121,5 +121,7 @@ int main(int argl, char **args) {
     } else if (pargs.ftype == BMPOUT_PNG) {
         // I need to test if this works.
         raw_bmp.write_as_png(outstream);
+    } else if (pargs.ftype == BMPOUT_JPEG) {
+        raw_bmp.write_as_jpeg(outstream);
     }
 }

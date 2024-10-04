@@ -14,15 +14,6 @@
 // Determine what formats are supported.
 #include "config.h"
 
-// Optional formats included here.
-#ifdef ENABLE_PNG
-#include <png.h>
-// Needed for setjmp()/longjmp(), used for error handling.
-#include <csetjmp>
-#endif
-
-// I haven't implemented support for advanced formats yet. I hope to do PNG first.
-
 // Global functions
 
 bool bitmap::type_is_supported(BitmapOutputType filetype) {
@@ -37,6 +28,11 @@ bool bitmap::type_is_supported(BitmapOutputType filetype) {
       // included. Otherwise, it isn't (falling back to false).
 #ifdef ENABLE_PNG
       case BMPOUT_PNG:
+        return true;
+        break;
+#endif
+#if defined ENABLE_LIBJPEG || defined ENABLE_TJPEG3
+      case BMPOUT_JPEG:
         return true;
         break;
 #endif
@@ -119,7 +115,29 @@ void bitmap::write_pixel_vec3(int row, int column, const color &px_color) {
 
 // Bitmap writer/serialization functions
 
-// Writes out bitmap as PPM data (TODO: Implement more formats)
+void bitmap::write_to_file(std::ostream &out, BitmapOutputType filetype) {
+    // Note: I expect you have already checked to make sure you aren't trying
+    // to use an unsupported writer.
+    switch (filetype) {
+      case BMPOUT_PPM:
+        write_as_ppm(out);
+        break;
+      case BMPOUT_BMP:
+        write_as_bmp_btt(out);
+        break;
+      case BMPOUT_PNG:
+        write_as_png(out);
+        break;
+      case BMPOUT_JPEG:
+        write_as_jpeg(out);
+        break;
+      default:
+        std::clog << "Unsupported file type!\n";
+        break;
+    }
+}
+
+// Writes out bitmap as PPM data
 void bitmap::write_as_ppm(std::ostream &out) {
     // PPM header
     out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -228,9 +246,14 @@ void bitmap::write_as_bmp_btt(std::ostream &out) {
     }
 }
 
-// Writes out a PNG (support is optional)
-#ifdef ENABLE_PNG
+// Implementations of optional writers.
 
+#ifdef ENABLE_PNG
+#include <png.h>
+// Needed for setjmp()/longjmp(), used for error handling.
+#include <csetjmp>
+
+// Callbacks for PNG writer to write to an ostream
 static void png_write_callback(png_structp png_ptr, png_bytep data, png_size_t len) {
     std::ostream *out_ptr = (std::ostream *)png_get_io_ptr(png_ptr);
     std::ostream &out = *out_ptr;
@@ -243,6 +266,7 @@ static void png_flush_callback(png_structp png_ptr) {
     (*out_ptr) << std::flush;
 }
 
+// Writes out a PNG (support is optional)
 void bitmap::write_as_png(std::ostream &out) {
     // Implement the real thing here.
     // Determine which args are necessary.
@@ -265,6 +289,8 @@ void bitmap::write_as_png(std::ostream &out) {
     }
 
     // They make me use setjmp/longjmp() for error handling :(
+    // This returns 0 initially, something else if jumped back to.
+    // Note that setjmp() must be used every time a new function accesses libpng.
     if (setjmp(png_jmpbuf(png_ptr))) {
         // Error occurred
         png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -284,13 +310,16 @@ void bitmap::write_as_png(std::ostream &out) {
                  PNG_COMPRESSION_TYPE_DEFAULT,
                  PNG_FILTER_TYPE_DEFAULT);
 
+    // Set pixel density (in px/m)
+    png_set_pHYs(png_ptr, info_ptr, 3780, 3780, PNG_RESOLUTION_METER);
+
     // Start here?
     // Write header data
     png_write_info(png_ptr, info_ptr);
     // It takes different "row pointers". png_bytep is unsigned char *
     png_bytep row_pointers[image_height];
 
-    if (image_height > PNG_UINT_32_MAX / sizeof(png_bytep))
+    if (uint32_t(image_height) > PNG_UINT_32_MAX / sizeof(png_bytep))
         png_error(png_ptr, "Image is too tall to process in memory");
 
     for (int index = 0; index < image_height; index++) {
@@ -298,13 +327,129 @@ void bitmap::write_as_png(std::ostream &out) {
     }
 
     png_write_image(png_ptr, row_pointers);
-
     png_write_end(png_ptr, info_ptr);
-
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
 #else
 void bitmap::write_as_png(std::ostream &out) {
+    return;
+}
+#endif
+
+#ifdef ENABLE_TJPEG3
+// I use the TurboJPEG API, not the libjpeg API.
+#include <turbojpeg.h>
+
+// Write out a JPEG (using TurboJPEG 3). Note that TurboJPEG is currently untested.
+void bitmap::write_as_jpeg(std::ostream &out) {
+    tjhandle j_handle = tj3Init(TJINIT_COMPRESS); // Returns handle or NULL if error
+
+    if (!j_handle) {
+        std::clog << "Failed to initialize libjpeg-turbo writer: "
+                  << tj3GetErrorStr(j_handle) << '\n';
+        return;
+    }
+
+    // Quality level and subsampling *must* be set before attempting compression.
+    // Quality level 80
+    int val_check = tj3Set(j_handle, TJPARAM_QUALITY, 80);
+    // 4:2:0 chroma subsampling as a default (we can do 4:4:4, 4:2:2, 4:2:0)
+    val_check = tj3Set(j_handle, TJPARAM_SUBSAMP, TJSAMP_420);
+
+    // I thought it would be nice for them to know the DPI.
+    val_check = tj3Set(j_handle, TJPARAM_DENSITYUNITS, 1); // DPI
+    val_check = tj3Set(j_handle, TJPARAM_XDENSITY, 96);
+    val_check = tj3Set(j_handle, TJPARAM_YDENSITY, 96);
+
+    uint8_t *jpeg_buf = nullptr; // jpeg-turbo will auto-allocate the buffer
+    size_t jpeg_buf_size;
+
+    // This is the important one.
+    val_check = tj3Compress8(j_handle,
+                             pixel_data, // Note: it expects a linear top-to-bottom framebuffer here.
+                             image_width,
+                             0, // The "pitch", which is autoderived here to 3 * image_width
+                             image_height,
+                             TJPF_RGB, // R8G8B8
+                             &jpeg_buf,
+                             &jpeg_buf_size);
+
+    if (val_check == -1) {
+        std::clog << "Failed to compress JPEG: " << tj3GetErrorStr(j_handle) << '\n';
+        return;
+    }
+
+    // We should have a working JPEG buffer now.
+    out.write(reinterpret_cast<char *>(jpeg_buf), jpeg_buf_size);
+
+    tj3Free(jpeg_buf); // They require us to use their free function for auto-allocated buffers.
+}
+#elif defined ENABLE_LIBJPEG
+// Fallback: libjpeg-turbo
+// Must be included before libjpeg headers
+#include <cstdio>
+// For free()
+#include <cstddef>
+#include <jpeglib.h>
+#include <jerror.h>
+
+// Write out a JPEG (using libjpeg/libjpeg-turbo)
+void bitmap::write_as_jpeg(std::ostream &out) {
+    struct jpeg_compress_struct j_comp;
+    struct jpeg_error_mgr jerr;
+
+    uint8_t *jpeg_buf = nullptr;
+    unsigned long jpeg_buf_size = 0;
+    JSAMPROW row_pointers[image_height];
+
+    j_comp.err = jpeg_std_error(&jerr); // Initialize error handling
+    jpeg_create_compress(&j_comp);
+
+    jpeg_mem_dest(&j_comp, &jpeg_buf, &jpeg_buf_size);
+
+    j_comp.image_width = image_width;
+    j_comp.image_height = image_height;
+    j_comp.input_components = 3; // RGB
+    j_comp.in_color_space = JCS_RGB;
+    j_comp.data_precision = 8; // bpc
+
+    jpeg_set_defaults(&j_comp);
+
+    jpeg_set_quality(&j_comp, 80, true); // last arg limits to baseline JPEG
+
+    // To set 4:4:4 subsampling:
+    //j_comp.comp_info[0].h_samp_factor = j_comp.comp_info[0].v_samp_factor = 1;
+
+    jpeg_start_compress(&j_comp, true); // True ensures a full JPEG
+
+    for (int index = 0; index < image_height; index++) {
+        row_pointers[index] = pixel_data + index * image_width * 3;
+    }
+
+    int check = jpeg_write_scanlines(&j_comp, row_pointers, image_height);
+
+    int num_tries = 0;
+    while (check < image_height) {
+        // It should have written everything, but try again.
+        std::clog << "libjpeg was supposed to write " << image_height
+                  << " lines, actually wrote " << check << " lines.\n";
+        check = jpeg_write_scanlines(&j_comp, row_pointers + check, image_height - check);
+        num_tries++;
+        if (num_tries == 10) {
+            std::clog << "Tried this 10 times and failed, now giving up.\n";
+            return;
+        }
+    }
+    jpeg_finish_compress(&j_comp);
+    out.write(reinterpret_cast<char *>(jpeg_buf), jpeg_buf_size);
+
+    jpeg_destroy_compress(&j_comp);
+
+    // Source code seems to say I need to free() jpeg_buf myself.
+    free(jpeg_buf);
+}
+#else
+void bitmap::write_as_jpeg(std::ostream &out) {
     return;
 }
 #endif

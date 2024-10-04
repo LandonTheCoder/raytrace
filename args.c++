@@ -14,6 +14,7 @@
 // Prints help
 static void print_help(bool is_err, char *progname) {
     bool png_supported = bitmap::type_is_supported(BMPOUT_PNG);
+    bool jpeg_supported = bitmap::type_is_supported(BMPOUT_JPEG);
     char help_str[] =
 "\npositional arguments:\n"
 "  FILE                  Specifies file to output to (defaults to stdout if\n"
@@ -29,6 +30,8 @@ static void print_help(bool is_err, char *progname) {
     output << "usage: " << progname << " [-h] [-t TYPE] [FILE]\n" << help_str;
     if (png_supported)
         output << ", png";
+    if (jpeg_supported)
+        output << ", jpg";
     output << ")\n";
 }
 
@@ -65,6 +68,8 @@ struct args parse_args(int argl, char **args) {
     bool type_is_set_explicitly = false;
     // Stop processing positional arguments
     bool no_more_options = false;
+    // Explicit request to write to stdout
+    bool stdout_explicit = false;
 
     using namespace std::string_view_literals; // needed for ""sv
 
@@ -105,7 +110,12 @@ struct args parse_args(int argl, char **args) {
             no_more_options = true;
         } else if (sv == "-"sv) {
             // FIXME: This is supposed to handle the - (write to stdout) argument
-            ;
+            if (parsed_args.fname_pos != -1 || stdout_explicit) {
+                print_help(true, args[0]);
+                std::clog << "You cannot specify multiple files.\n";
+                exit(1);
+            }
+            stdout_explicit = true;
         } else if (sv.starts_with("-")) {
             // Unrecognized option
             print_help(true, args[0]);
@@ -117,7 +127,8 @@ struct args parse_args(int argl, char **args) {
 
         if (set_fname) {
             // Basic sanity check: make sure it isn't specified multiple times
-            if (parsed_args.fname_pos != -1) {
+            // Also, explicit stdout should never reach this code.
+            if (parsed_args.fname_pos != -1 || stdout_explicit) {
                 print_help(true, args[0]);
                 std::clog << "You cannot specify multiple files.\n";
                 exit(1);
@@ -136,6 +147,13 @@ struct args parse_args(int argl, char **args) {
                     if (!bitmap::type_is_supported(BMPOUT_PNG)) {
                         print_help(true, args[0]);
                         std::clog << "PNG support not built in.\n";
+                        exit(4);
+                    }
+                } else if (iendswith(sv, ".jpg"sv)) {
+                    parsed_args.ftype = BMPOUT_JPEG;
+                    if (!bitmap::type_is_supported(BMPOUT_JPEG)) {
+                        print_help(true, args[0]);
+                        std::clog << "JPEG support not built in.\n";
                         exit(4);
                     }
                 } else {
@@ -158,6 +176,13 @@ struct args parse_args(int argl, char **args) {
                 if (!bitmap::type_is_supported(BMPOUT_PNG)) {
                     print_help(true, args[0]);
                     std::clog << "PNG support not built in.\n";
+                    exit(4);
+                }
+            } else if (type_name == "jpg"sv) {
+                parsed_args.ftype = BMPOUT_JPEG;
+                if (!bitmap::type_is_supported(BMPOUT_JPEG)) {
+                    print_help(true, args[0]);
+                    std::clog << "JPEG support not built in.\n";
                     exit(4);
                 }
             } else {

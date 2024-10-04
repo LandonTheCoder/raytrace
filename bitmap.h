@@ -45,7 +45,7 @@ class bitmap {
     // Like write_pixel_rgb() but using a color vector instead.
     void write_pixel_vec3(int row, int column, const color &px_color);
 
-    // Writes out bitmap as PPM data (TODO: Implement more formats)
+    // Writes out bitmap as PPM data
     void write_as_ppm(std::ostream &out);
 
     // Writes out bitmap to BMP, written top-to-bottom order.
@@ -54,8 +54,14 @@ class bitmap {
     // Writes out bitmap to BMP, written bottom-to-top (standard) order.
     void write_as_bmp_btt(std::ostream &out);
 
-    // Writes out bitmap to a PNG (with default settings). Not implemented.
+    // Writes out bitmap to a PNG (with default settings).
     void write_as_png(std::ostream &out);
+
+    // Writes out bitmap to a JPEG (for settings, see bitmap.c++).
+    void write_as_jpeg(std::ostream &out);
+
+    // Write to file (selected based on type specified)
+    void write_to_file(std::ostream &out, BitmapOutputType filetype);
 
     // Returns whether a type is supported.
     static bool type_is_supported(BitmapOutputType filetype);

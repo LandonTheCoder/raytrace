@@ -40,7 +40,6 @@ rt_main_files = ['args.c++',
                  'sphere.c++']
 
 # I don't need most of this stuff for ppm-example, just link the necessary ones.
-executable('ppm-example', 'ppm-example.c++', 'bitmap.c++', dependencies: deps)
 executable('render-example',
            'render-example.c++',
            'args.c++',

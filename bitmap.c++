@@ -14,6 +14,9 @@
 // Determine what formats are supported.
 #include "config.h"
 
+// Quality definitions
+#define JPEG_QUALITY 95
+
 // Global functions
 
 bool bitmap::type_is_supported(BitmapOutputType filetype) {
@@ -352,7 +355,7 @@ void bitmap::write_as_jpeg(std::ostream &out) {
 
     // Quality level and subsampling *must* be set before attempting compression.
     // Quality level 80
-    int val_check = tj3Set(j_handle, TJPARAM_QUALITY, 80);
+    int val_check = tj3Set(j_handle, TJPARAM_QUALITY, JPEG_QUALITY);
     // 4:2:0 chroma subsampling as a default (we can do 4:4:4, 4:2:2, 4:2:0)
     val_check = tj3Set(j_handle, TJPARAM_SUBSAMP, TJSAMP_420);
 
@@ -415,7 +418,23 @@ void bitmap::write_as_jpeg(std::ostream &out) {
 
     jpeg_set_defaults(&j_comp);
 
-    jpeg_set_quality(&j_comp, 80, true); // last arg limits to baseline JPEG
+    jpeg_set_quality(&j_comp, JPEG_QUALITY, true); // last arg limits to baseline JPEG
+
+    /* Chroma subsampling works like this in the libjpeg API:
+     * There is a j_comp.comp_info[i].h_samp_factor and a
+     * j_comp.comp_info[i].v_samp_factor. Value must be between [1, 4].
+     * Higher h/v_samp_factor numbers indicate higher resolution.
+     * Their relation to each other determines quality.
+     * j_comp.comp_info[0] is Y (Luminance)
+     * j_comp.comp_info[1] is Cb (U)
+     * j_comp.comp_info[2] is Cr (V)
+     * By default, Y is 2h 2v, and U/V is 1h 1v (meaning Y has twice as much
+     * resolution as chrominance). That amounts to 4:2:0 chroma subsampling.
+     * The types of subsampling:
+     * 4:4:4 is no chroma subsampling (chroma and luma are full resolution).
+     * 4:2:2 is a reduction by factor of 2 horizontally (2×1 blocks).
+     * 4:2:0 is a reduction by factor of 2 in both directions (2×2 blocks).
+     */
 
     // To set 4:4:4 subsampling:
     //j_comp.comp_info[0].h_samp_factor = j_comp.comp_info[0].v_samp_factor = 1;

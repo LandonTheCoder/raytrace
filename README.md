@@ -28,3 +28,8 @@ The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
 I have enhanced it so that it can take arguments specifying an output file, supporting PPM, BMP, and (optionally) PNG and JPEG.
 
 I have some quirks to help support Windows, but it isn't tested on Windows.
+
+## Results ##
+This is rendered at 1200×675 px, 500 samples per pixel (see `raytracer.c++`), and output in JPEG (quality 95). The renders are stored in the `examples/` folder.
+
+![A scene with many different orbs of different sizes. There are 2 large orbs and many small ones. Some of the orbs are opaque. Some of them have a glassy, reflective look. Some of them have a reflective look closer to metal. The non-glassy orbs are in various colors, such as brown, red, blue, green, and purple.](examples/final.jpg)

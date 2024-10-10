@@ -1,0 +1,12 @@
+/* Used to set some definitions */
+#include <windows.h>
+
+/* RT_MANIFEST declares a manifest. 
+ * At position 1, it becomes the executable's manifest.
+ * raytracer.exe.manifest declares the file it is present in.
+ * I think the name is arbitrary, but by convention it matches the executable
+ * that it is embedded in.
+ */
+1 RT_MANIFEST raytracer.exe.manifest
+
+/* I can add more resources here if I want to for Windows (like an icon, maybe?) */

@@ -8,6 +8,10 @@ extern "C" {
 
 /* Sets locale correctly. This ensures a locale other than the "C" locale,
  * and on Windows ensures UTF-8 locale if possible.
+ * Returns 0 if no-op or UTF-8 ensured. On Windows, returns active codepage
+ * if it fails to have UTF-8 ACP (thus needing filename reconversion).
+ * Note that filename conversion is not currently implemented, so it will
+ * fail to open non-ASCII filenames.
  */
 int ensure_locale(void);
 

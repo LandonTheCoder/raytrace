@@ -1,4 +1,4 @@
-project('raytrace', 'c', 'cpp', default_options: ['cpp_std=c++20'], license: 'MIT', version: '1.2.1')
+project('raytrace', 'c', 'cpp', default_options: ['cpp_std=c++20'], license: 'MIT', version: '1.2.2')
 
 conf_data = configuration_data()
 
@@ -29,6 +29,18 @@ configure_file(output: 'config.h', configuration: conf_data)
 
 deps = [png_dep, jpeg_dep]
 
+# Files linked in which are OS-specific
+os_inputs = []
+
+# OS-specific stuff
+if host_machine.system() == 'windows'
+    windows = import('windows')
+    resource_depends = ['arch/win/raytracer.exe.manifest']
+    resource_file = windows.compile_resources('arch/win/raytracer.rc',
+                                              depend_files: resource_depends)
+    os_inputs += resource_file
+endif
+
 # The files implementing the raytracer internals
 rt_main_files = ['args.c++',
                  'bitmap.c++',
@@ -45,5 +57,6 @@ executable('render-example',
            'args.c++',
            'bitmap.c++',
            'quirks.c',
+           os_inputs,
            dependencies: deps)
-executable('raytracer', 'raytracer.c++', rt_main_files, dependencies: deps)
+executable('raytracer', 'raytracer.c++', rt_main_files, os_inputs, dependencies: deps)

@@ -24,8 +24,24 @@
 int main(int argl, char **args) {
     // Setup quirks to help ensure the environment
     int locale_is_good = ensure_locale();
+    // Returns 0 if success/no-op, -1 if unavailable, positive error code otherwise.
+    int vt_escape_status = enable_vt_escapes();
     // This *should* make sure Windows doesn't clobber binary files written to std::cout.
     fix_stdout();
+
+    // If not UTF-8, it returns the codepage in locale_is_good
+    if (vt_escape_status == 0 && locale_is_good > 0) {
+        // Terminal escapes supported, so do fancy print
+        // "\e[1m" is bold, "\e[31m" is red, "\e[0m" is reset
+        std::clog << "\033[1m\033[31mWARNING: Not running in UTF-8 mode! Non-ASCII "
+                     "filenames will fail to open! Running in codepage "
+                  << locale_is_good << '\n';
+    } else if (locale_is_good > 0) {
+        // Boring print
+        std::clog << "WARNING: Not running in UTF-8 mode! Non-ASCII "
+                     "filenames will fail to open! Running in codepage "
+                  << locale_is_good << '\n';
+    }
 
     struct args pargs = parse_args(argl, args);
 

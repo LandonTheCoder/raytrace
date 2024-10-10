@@ -39,15 +39,57 @@ static void print_win_err(const char *func_name, int32_t err) {
     LocalFree(msg_buf);
 }
 
+// The basic Windows version
+struct winver {
+    int32_t major;
+    int32_t minor;
+    int32_t build;
+};
+
+// For system checks
+static struct winver get_win_version(void) {
+    struct winver retval;
+    /* Returns packed int32 containing:
+     *   - build in top 16 bits
+     *   - minor in top 8 bits of bottom 16 bits
+     *   - major in bottom 8 bits of bottom 16 bits
+     */
+    uint32_t winver = GetVersion();
+    // Low byte of the bottom 16 bits
+    retval.major = winver & 0xFF;
+    // High byte of the bottom 16 bits
+    retval.minor = (winver & 0xFFFF) >> 8;
+    // Top 16 bits (Microsoft says I need this check here?)
+    if (winver < 0x80000000)
+        retval.build = (winver >> 16);
+    else
+        retval.build = 0;
+    return retval;
+}
+
 // Exported functions
 
-// Returns 0 if fully successful
+// Returns 0 if fully successful (UTF-8 codepage), real codepage otherwise
 int ensure_locale(void) {
+    /* Determine whether UTF-8 codepage is supported. I have to explicitly opt
+     * into the UTF-8 codepage, which doesn't work on builds before 1903 or so.
+     * If not supported (or broken), it falls back to the legacy codepage, and
+     * I would have to do conversion from UTF-16 to UTF-8 to avoid breaking on
+     * Non-ASCII filenames.
+     */
+    uint32_t active_codepage = GetACP();
     // Like setlocale(LC_ALL, ""), but also ensures UTF-8 locale for Windows on UCRT.
     setlocale(LC_ALL, ".UTF-8");
-    // I determine ACP to know whether Meson defaults to ACP=UTF-8
-    printf("Active codepage is: %s\n", GetACP());
-    return 0;
+    struct winver winver = get_win_version();
+
+    if (active_codepage == 65001) {
+        // UTF-8 mode (which is CP65001 in Windows)
+        return 0;
+    } else {
+        printf("Windows version: %i.%i build %i\n", winver.major, winver.minor, winver.build);
+        // Would be CP1252 if it fails in en-US locale (so a return value of 1252 in that case)
+        return active_codepage;
+    }
 }
 
 // Obviously, just return 0 if running on Unix-like OS. Use ifdefs for that.

@@ -15,10 +15,15 @@
 #include <fcntl.h>
 #include <io.h>
 
+// Internal variables
+// Widechar args, which holds arguments in UTF-16. Can be freed by LocalFree()
+wchar_t **wcargs = NULL;
+int wcargl = -1; // Holds length of wcargs (UTF-16 arguments)
+
 // Utility functions
 
 // This converts an integer error to a string error and logs it.
-static void print_win_err(const char *func_name, int32_t err) {
+static void print_win_err(const char *func_name, uint32_t err) {
     LPTSTR msg_buf, display_buf;
     // FormatMessage(DWORD flags, LPCVOID src, DWORD msg_id, DWORD lang_id,
     //               LPTSTR buf (out), DWORD size, ...)
@@ -67,6 +72,15 @@ static struct winver get_win_version(void) {
     return retval;
 }
 
+// Initialize UTF-16 argument array for reconversion of arguments
+static void init_wcargs(void) {
+    // Get widechar (UTF-16) args in a manner similar to regular args
+    wcargs = CommandLineToArgvW(GetCommandLineW(), &wcargl);
+    if (wcargs == NULL)
+        fprintf(stderr, "CommandLineToArgvW failed!\n");
+}
+
+
 // Exported functions
 
 // Returns 0 if fully successful (UTF-8 codepage), real codepage otherwise
@@ -98,13 +112,13 @@ int enable_vt_escapes(void) {
     // I log to stderr
     HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
     if (out == INVALID_HANDLE_VALUE) {
-        int32_t err = GetLastError();
+        uint32_t err = GetLastError();
         print_win_err("GetStdHandle", err);
         return err;
     }
     DWORD cons_mode = 0;
     if (!GetConsoleMode(out, &cons_mode)) {
-        int32_t err = GetLastError();
+        uint32_t err = GetLastError();
         print_win_err("GetConsoleMode", err);
         return err;
     }
@@ -112,7 +126,7 @@ int enable_vt_escapes(void) {
     cons_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING
     if (!SetConsoleMode(out, cons_mode)) {
         // ERROR_INVALID_PARAMETER if not supported
-        int32_t err = GetLastError();
+        uint32_t err = GetLastError();
         if (err == ERROR_INVALID_PARAMETER)
             return -1; // Indicate unsupported
         // Only runs if it is an error other than "unsupported"
@@ -125,6 +139,52 @@ int enable_vt_escapes(void) {
 // Fix stdout to be binary so it doesn't corrupt binary files
 void fix_stdout(void) {
     _setmode(_fileno(stdout), _O_BINARY);
+}
+
+// Retrieve reconverted CLI argument (which should be Unicode-clean)
+// May return NULL (eventually crashing program) if conversion fails.
+char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
+    char *retarg;
+    if (wcargs == NULL) {
+        init_wcargs();
+    }
+
+    if (argl != wcargl) {
+        fprintf("Hmm, that's weird. argl = %i, wcargl = %i. "
+                "All bets are off.\n", argl, wcargl);
+    }
+    /* int WideCharToMultiByte(unsigned int codepage, uint32_t flags,
+     *                         wchar_t **instr, int inlen, char **outstr,
+     *                         int outsize, char *default_char,
+     *                         winbool default_char_used)
+     * Note that winbool is actually an int internally. (Why?)
+     * For more info, see:
+     *  - https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-widechartomultibyte
+     *  - https://learn.microsoft.com/en-us/windows/win32/winprog/windows-data-types
+     */
+    // I need to determine allocation size.
+    int alloc_sz = WideCharToMultiByte(CP_UTF8, 0, wcargs[arg_pos],
+                                       -1, // null-terminated
+                                       NULL, // unused
+                                       0, // return size
+                                       NULL, // invalid otherwise
+                                       NULL); // Ditto
+    if (alloc_sz == 0) {
+        uint32_t err = GetLastError();
+        print_win_err("WideCharToMultiByte (size check)", err);
+        // This means it crashes when I try to use the argument.
+        // For example, when attempting to open the file.
+        return NULL;
+    }
+    retarg = (char *) malloc(alloc_sz);
+    // Actually do conversion with appropriately sized buffer
+    int status = WideCharToMultiByte(CP_UTF8, 0, wcargs[arg_pos], -1, retarg,
+                                     alloc_sz, NULL, NULL);
+    if (status == 0) {
+        uint32_t err = GetLastError();
+        print_win_err("WideCharToMultiByte", err);
+        return NULL;
+    }
 }
 
 #else
@@ -140,5 +200,8 @@ int enable_vt_escapes(void) {
 }
 void fix_stdout(void) {
     return;
+}
+char * reconv_fname_arg(int arg_pos, int argl, char *fname) {
+    return fname; // No conversion needed
 }
 #endif // defined(_WIN32)

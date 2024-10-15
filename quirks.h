@@ -27,6 +27,13 @@ int enable_vt_escapes(void);
  */
 void fix_stdout(void);
 
+/* Reconverts the CLI argument if necessary. Otherwise, returns existing
+ * argument again so it can be used more conveniently.
+ * arg_pos is the index in the argument array, argl is a.k.a. argc,
+ * arg is the existing argument.
+ */
+char * reconv_cli_arg(int arg_pos, int argl, char *arg);
+
 #ifdef __cplusplus
 }
 #endif

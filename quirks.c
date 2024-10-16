@@ -150,8 +150,8 @@ char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
     }
 
     if (argl != wcargl) {
-        fprintf("Hmm, that's weird. argl = %i, wcargl = %i. "
-                "All bets are off.\n", argl, wcargl);
+        fprintf(stderr, "Hmm, that's weird. argl = %i, wcargl = %i. "
+                        "All bets are off.\n", argl, wcargl);
     }
     /* int WideCharToMultiByte(unsigned int codepage, uint32_t flags,
      *                         wchar_t **instr, int inlen, char **outstr,

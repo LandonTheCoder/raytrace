@@ -31,6 +31,8 @@ void fix_stdout(void);
  * argument again so it can be used more conveniently.
  * arg_pos is the index in the argument array, argl is a.k.a. argc,
  * arg is the existing argument.
+ * Note: If it were reallocated, the caller would have to free(), but I
+ * don't really see any reason to free() an argument anyways.
  */
 char * reconv_cli_arg(int arg_pos, int argl, char *arg);
 

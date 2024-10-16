@@ -201,7 +201,7 @@ int enable_vt_escapes(void) {
 void fix_stdout(void) {
     return;
 }
-char * reconv_fname_arg(int arg_pos, int argl, char *fname) {
+char * reconv_cli_arg(int arg_pos, int argl, char *fname) {
     return fname; // No conversion needed
 }
 #endif // defined(_WIN32)

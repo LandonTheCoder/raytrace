@@ -29,21 +29,28 @@ int main(int argl, char **args) {
     // This *should* make sure Windows doesn't clobber binary files written to std::cout.
     fix_stdout();
 
+    struct args pargs = parse_args(argl, args);
+
     // If not UTF-8, it returns the codepage in locale_is_good
-    if (vt_escape_status == 0 && locale_is_good > 0) {
+    if (locale_is_good > 0) {
         // Terminal escapes supported, so do fancy print
         // "\e[1m" is bold, "\e[31m" is red, "\e[0m" is reset
-        std::clog << "\033[1m\033[31mWARNING: Not running in UTF-8 mode! Non-ASCII "
-                     "filenames will fail to open! Running in codepage "
+        char acperr_ansi[] = "\033[1m\033[31mWARNING: Not running in UTF-8 mode! Non-ASCII "
+                           "filenames may fail to open! Running in codepage ";
+        // The boring version
+        char acperr_plain[] = "WARNING: Not running in UTF-8 mode! Non-ASCII "
+                              "filenames may fail to open! Running in codepage ";
+        std::clog << (vt_escape_status == 0? acperr_ansi : acperr_plain)
                   << locale_is_good << '\n';
-    } else if (locale_is_good > 0) {
-        // Boring print
-        std::clog << "WARNING: Not running in UTF-8 mode! Non-ASCII "
-                     "filenames will fail to open! Running in codepage "
-                  << locale_is_good << '\n';
-    }
 
-    struct args pargs = parse_args(argl, args);
+        // Experimental: Try to reconvert filename
+        char *temp = reconv_cli_arg(pargs.fname_pos, argl, pargs.fname);
+        if (temp == nullptr) {
+            std::clog << "Filename conversion failed.\n";
+            return 6;
+        }
+        pargs.fname = temp;
+    }
 
     // We open file here so errors with opening are found early.
     std::ofstream out_file;

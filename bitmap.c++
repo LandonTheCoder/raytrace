@@ -14,6 +14,26 @@
 // Determine what formats are supported.
 #include "config.h"
 
+/* I need to emulate VLAs on compilers lacking the extension to support it.
+ * Note that VLAs are standard in C (optionally in C11+), but not C++.
+ * GCC/Clang supports it (standard) in C, and (extension) in C++.
+ * A popular vendor compiler for Windows supports it in neither C nor C++.
+ * That means I have to emulate it using alloca() (which allocates to stack).
+ * I don't want to do a heap allocation because it means overhead (and because
+ * unique_ptr<> for a temporary variable is irritating).
+ * I also have the VLA form because it is more readable than the alloca() or
+ * malloc() equivalent of either (and I would have to look up how to do it with
+ * the new operator).
+ */
+#ifdef __GNUC__
+// To note a compiler (independent of vendor) which allows VLAs
+#define HAVE_VLA
+#else
+// GNU C extensions not supported (which includes VLAs in C++)
+// This means VLA emulation is required.
+#include <arch/alloca.h>
+#endif
+
 // Quality definitions
 #define JPEG_QUALITY 95
 
@@ -320,7 +340,12 @@ void bitmap::write_as_png(std::ostream &out) {
     // Write header data
     png_write_info(png_ptr, info_ptr);
     // It takes different "row pointers". png_bytep is unsigned char *
+#ifdef HAVE_VLA
     png_bytep row_pointers[image_height];
+#else
+    // Fallback based on alloca(). See why I had the VLA originally?
+    png_bytepp row_pointers = png_bytepp(alloca(image_height * sizeof(png_bytepp)));
+#endif
 
     if (uint32_t(image_height) > PNG_UINT_32_MAX / sizeof(png_bytep))
         png_error(png_ptr, "Image is too tall to process in memory");
@@ -403,7 +428,12 @@ void bitmap::write_as_jpeg(std::ostream &out) {
 
     uint8_t *jpeg_buf = nullptr;
     unsigned long jpeg_buf_size = 0;
+#ifdef HAVE_VLA
     JSAMPROW row_pointers[image_height];
+#else
+    // I prefer the VLA form because it is more readable, and better tested.
+    JSAMPARRAY row_pointers = JSAMPARRAY(alloca(image_height * sizeof(JSAMPARRAY)));
+#endif
 
     j_comp.err = jpeg_std_error(&jerr); // Initialize error handling
     jpeg_create_compress(&j_comp);

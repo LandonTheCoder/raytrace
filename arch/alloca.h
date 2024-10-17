@@ -11,3 +11,6 @@
 // This holds true on at least FreeBSD.
 #include <stdlib.h>
 #endif
+
+// For convenience and more readability. While this helps, this shows how VLAs help with clarity.
+#define STACK_VLARRAY(arr_type, length) ((arr_type *)alloca(length * sizeof(arr_type)))

@@ -24,6 +24,8 @@
  * I also have the VLA form because it is more readable than the alloca() or
  * malloc() equivalent of either (and I would have to look up how to do it with
  * the new operator).
+ *
+ * Alternative implementation: unique_ptr<T[]> x = make_unique<T[]>(image_height);
  */
 #ifdef __GNUC__
 // To note a compiler (independent of vendor) which allows VLAs
@@ -343,8 +345,8 @@ void bitmap::write_as_png(std::ostream &out) {
 #ifdef HAVE_VLA
     png_bytep row_pointers[image_height];
 #else
-    // Fallback based on alloca(). See why I had the VLA originally?
-    png_bytepp row_pointers = png_bytepp(alloca(image_height * sizeof(png_bytepp)));
+    // Fallback based on alloca().
+    png_bytepp row_pointers = STACK_VLARRAY(png_bytep, image_height);
 #endif
 
     if (uint32_t(image_height) > PNG_UINT_32_MAX / sizeof(png_bytep))
@@ -432,7 +434,7 @@ void bitmap::write_as_jpeg(std::ostream &out) {
     JSAMPROW row_pointers[image_height];
 #else
     // I prefer the VLA form because it is more readable, and better tested.
-    JSAMPARRAY row_pointers = JSAMPARRAY(alloca(image_height * sizeof(JSAMPARRAY)));
+    JSAMPARRAY row_pointers = STACK_VLARRAY(JSAMPROW, image_height);
 #endif
 
     j_comp.err = jpeg_std_error(&jerr); // Initialize error handling

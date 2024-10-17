@@ -64,6 +64,14 @@ std::vector\<T\> stores a collection of a specified type in a list that grows au
    - Enabling on Windows: See [Microsoft Documentation](https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences)
    - The line-clearing "Done" string can be: "\r\033[0KDone.\n"
  - Make sure stdout works correctly on Windows (may require enabling binary mode). See [_setmode()](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setmode)
+ - Implement multithreading.
+   - std::thread constructor takes a function and its arguments, figure out how that accounts for running a class' method.
+     - From cppreference, it looks like I can use thread(&class::method, classptr, args...) to initialize it.
+   - Implementation note: When starting the thread, I need to use std::cref() to wrap constant references, and std::ref() to wrap normal references.
+   - Use a std::mutex to avoid clashes for access to remaining lines counter.
+   - Use std::lock\_guard\<std::mutex\> as an easy method to lock that mutex.
+   - Figure out how to store the threads. Maybe in a vector?
+   - For splitting up work, divide image\_height / nproc, for each thread line\_end is the line\_begin of the next one. The last thread gets the remainder.
 
 ## Structure of BMP file ##
  - Bitmap file header: 14 bytes

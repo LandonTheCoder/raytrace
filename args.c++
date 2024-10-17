@@ -4,6 +4,10 @@
 #include <cstdlib>
 // For std::string_view (requires C++17)
 #include <string_view>
+// For std::thread::hardware_concurrency()
+#include <thread>
+// For std::from_chars()
+#include <charconv>
 
 // For BMPOUT_*
 #include "bitmap.h"
@@ -22,12 +26,14 @@ static void print_help(bool is_err, char *progname) {
 "                        not specified.\n"
 "\noptional arguments:\n"
 "  -h, --help            show this help message and exit\n"
+"  -T NUM, --threads NUM Set the number of threads to run with. 0 is all threads\n"
+"                        (the default setting).\n"
 "  -t TYPE, --type TYPE  Set output file type. If stdout is specified, default\n"
 "                        to ppm format. (Options: bmp, ppm";
 
     std::ostream &output = is_err? std::clog : std::cout;
 
-    output << "usage: " << progname << " [-h] [-t TYPE] [FILE]\n" << help_str;
+    output << "usage: " << progname << " [-h] [-T NUM] [-t TYPE] [FILE]\n" << help_str;
     if (png_supported)
         output << ", png";
     if (jpeg_supported)
@@ -58,12 +64,20 @@ static bool iendswith(std::string_view bigstr, std::string_view matchstr) {
 }
 
 struct args parse_args(int argl, char **args) {
+    // Check number of threads. If unassessable, it returns 0, which is changed to 1.
+    int nproc = std::thread::hardware_concurrency();
+    if (nproc == 0)
+        nproc = 1;
     // Default argument values
-    struct args parsed_args = {.fname_pos = -1, .ftype = BMPOUT_PPM, .fname = nullptr};
+    struct args parsed_args = {.fname_pos = -1, .ftype = BMPOUT_PPM,
+                               .fname = nullptr, .n_threads = nproc};
 
     if (argl == 1)
         return parsed_args;
     int ftype_pos = -1;
+    // I could use a bool here to indicate "next argument is threads" but then
+    // I have to manually unset it at the handler.
+    int n_threads_pos = -1;
     // To avoid resetting explicit type with implicit type
     bool type_is_set_explicitly = false;
     // Stop processing positional arguments
@@ -81,8 +95,10 @@ struct args parse_args(int argl, char **args) {
         // This makes it easier to deal with.
         std::string_view sv(args[index]);
         std::string_view type_name;
+        std::string_view thread_num_string;
         bool set_type = false;
         bool set_fname = false;
+        bool set_thread_num = false;
 
         if (no_more_options) {
             // It has been declared that there are no more positional arguments.
@@ -99,13 +115,29 @@ struct args parse_args(int argl, char **args) {
             type_is_set_explicitly = true;
             continue; // Do next iteration
         } else if (sv.starts_with("--type=")) {
+            set_type = true;
             // Slice sv[7:]
             type_name = sv.substr(7);
             type_is_set_explicitly = true;
         } else if (sv.starts_with("-t")) {
-            // Slice sv[1:]
-            type_name = sv.substr(1);
+            set_type = true;
+            // Slice sv[2:]
+            type_name = sv.substr(2);
             type_is_set_explicitly = true;
+        } else if (n_threads_pos == index) {
+            set_thread_num = true;
+            thread_num_string = sv;
+        } else if (sv == "--threads"sv || sv == "-T"sv) {
+            n_threads_pos = index + 1;
+            continue; // Do next iteration
+        } else if (sv.starts_with("--threads=")) {
+            set_thread_num = true;
+            // Slice sv[10:]
+            thread_num_string = sv.substr(10);
+        } else if (sv.starts_with("-T")) {
+            set_thread_num = true;
+            // Slice sv[2:]
+            thread_num_string = sv.substr(2);
         } else if (sv == "--"sv) {
             no_more_options = true;
         } else if (sv == "-"sv) {
@@ -188,6 +220,29 @@ struct args parse_args(int argl, char **args) {
             } else {
                 print_help(true, args[0]);
                 std::clog << "Unrecognized file type: " << type_name << '\n';
+                exit(1);
+            }
+        }
+
+        if (set_thread_num) {
+            // Set (explicit) number of threads
+            auto [ptr, err] = std::from_chars(thread_num_string.data(),
+                                              thread_num_string.data() + thread_num_string.size(),
+                                              parsed_args.n_threads);
+
+            if (err == std::errc::invalid_argument) {
+                std::clog << "Not a number: " << thread_num_string << '\n';
+                exit(1);
+            } else if (err == std::errc::result_out_of_range) {
+                std::clog << "Number is too large: " << thread_num_string << '\n';
+                exit(1);
+            }
+            if (parsed_args.n_threads == 0)
+                parsed_args.n_threads = nproc;
+            else if (parsed_args.n_threads < 0) {
+                print_help(true, args[0]);
+                std::clog << "Number of threads must be 0 or greater (specified: "
+                          << parsed_args.n_threads << ")\n";
                 exit(1);
             }
         }

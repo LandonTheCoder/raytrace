@@ -10,6 +10,8 @@ struct args {
     int ftype;
     // File name (or nullptr if stdout)
     char *fname;
+    // Amount of threads to use. Not all programs implement this.
+    int n_threads;
 };
 
 // Parses args into a format that can more easily be used.

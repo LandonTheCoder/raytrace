@@ -1,6 +1,8 @@
+#pragma once
 #ifdef _WIN32
 // Windows used, I need to add a compatibility alias.
 #include <malloc.h>
+// Note: I assume MSVC here, I don't know what I should do if this is called on Win+GCC or Win+Clang.
 #define alloca _alloca
 #elif defined __linux__
 // On glibc systems, alloca.h has the function.

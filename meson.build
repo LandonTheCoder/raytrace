@@ -1,4 +1,4 @@
-project('raytrace', 'c', 'cpp', default_options: ['cpp_std=c++20'], license: 'MIT', version: '1.2.2')
+project('raytrace', 'c', 'cpp', default_options: ['cpp_std=c++20'], license: 'MIT', version: '1.3')
 
 conf_data = configuration_data()
 

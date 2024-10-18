@@ -7,6 +7,9 @@
 // To allow returning a bitmap
 #include "bitmap.h"
 
+// For std::mutex, std::recursive_mutex
+#include <mutex>
+
 class camera {
   public:
     // Place public camera parameters here.
@@ -21,11 +24,14 @@ class camera {
     point3 lookat = point3(0, 0, -1); // Point which camera looks at
     vec3 vup = vec3(0, 1, 0); // Camera-relative "up" direction
 
-
     double defocus_angle = 0; // Variation angle of rays through each pixel
     double focus_dist = 10; // Distance from camera's lookfrom to plane of perfect focus
 
+    // Single-threaded renderer
     bitmap render(const hittable &world);
+    // Multithreaded renderer. n_threads must be >= 0 (0 meaning "use all threads available").
+    // If n_threads is 1, it will fall back to the single-threaded renderer.
+    bitmap render(const hittable &world, int n_threads);
   private:
     // Place private camera variables here.
     int image_height; // Rendered image height
@@ -37,6 +43,14 @@ class camera {
     vec3 u, v, w; // Frame-basis vectors for camera
     vec3 defocus_disk_u; // Defocus disk horiz. radius
     vec3 defocus_disk_v; // Defocus disk vert. radius
+
+    // Multithreading extensions
+    std::mutex counter_mutex; // Locks counter variable, and access to stdout
+    std::recursive_mutex render_mutex; // Only 1 render from this camera at once.
+    int lines_remaining = -1; // Stores remaining lines for multithreaded mode.
+
+    // line_begin and line_end use inedxing conventions.
+    void render_mt_impl(const hittable &world, bitmap &raw_bmp, int line_begin, int line_end);
 
     void initialize();
     color ray_color(const ray &r, int depth, const hittable &world);

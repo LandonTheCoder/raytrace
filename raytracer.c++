@@ -131,7 +131,7 @@ int main(int argl, char **args) {
     // Note: +x is right, +y is up, +z is outwards relative to camera.
 
     // Initializes camera, renders, writes a PPM to stdout. (Make it more flexible in the future.)
-    auto raw_bmp = cam.render(world);
+    auto raw_bmp = cam.render(world, pargs.n_threads);
 
     // This is a trick to avoid writing the code twice for stdout and a file.
     std::ostream &outstream = (pargs.fname != nullptr)? out_file : std::cout;

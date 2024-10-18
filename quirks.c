@@ -123,7 +123,7 @@ int enable_vt_escapes(void) {
         return err;
     }
     // Enable escape sequence processing
-    cons_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    cons_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     if (!SetConsoleMode(out, cons_mode)) {
         // ERROR_INVALID_PARAMETER if not supported
         uint32_t err = GetLastError();

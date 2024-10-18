@@ -1,4 +1,4 @@
-project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.1',
+project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.2',
         meson_version: '>= 0.59.0',
         default_options: ['cpp_std=c++20', 'default_library=static'])
 # I put the default options up there because it doesn't seem to work otherwise.

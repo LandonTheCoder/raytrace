@@ -35,8 +35,8 @@ int main(int argl, char **args) {
     if (locale_is_good > 0) {
         // Terminal escapes supported, so do fancy print
         // "\e[1m" is bold, "\e[31m" is red, "\e[0m" is reset
-        char acperr_ansi[] = "\033[1m\033[31mWARNING: Not running in UTF-8 mode! Non-ASCII "
-                           "filenames may fail to open! Running in codepage ";
+        char acperr_ansi[] = "\033[1;31mWARNING\033[0m: Not running in UTF-8 mode! Non-ASCII "
+                             "filenames may fail to open! Running in codepage ";
         // The boring version
         char acperr_plain[] = "WARNING: Not running in UTF-8 mode! Non-ASCII "
                               "filenames may fail to open! Running in codepage ";

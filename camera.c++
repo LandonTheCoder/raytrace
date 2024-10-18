@@ -45,12 +45,16 @@ bitmap camera::render(const hittable &world, int n_threads) {
     if (n_threads < 0)
         throw std::invalid_argument("The number of threads must be 0 or greater!");
 
+    int vt_escape_status = enable_vt_escapes();
+
     // Note: render_mutex is a recursive mutex because it will also be locked from
     // the single-threaded renderer if we decide to call it.
     std::unique_lock<std::recursive_mutex> render_lock(render_mutex, std::try_to_lock);
 
     if (!render_lock) {
-        std::clog << "Warning: Trying to render when already rendering! "
+        // The "WARNING" text shows in bold red if ANSI escapes are available
+        std::clog << (vt_escape_status==0? "\033[1;31mWARNING\033[0m" : "WARNING")
+                  << ": Trying to render when already rendering! "
                      "Thread will hang until previous job finishes.\n";
         // Hangs until existing job is complete.
         render_lock.lock();
@@ -79,8 +83,6 @@ bitmap camera::render(const hittable &world, int n_threads) {
                   << " to " << image_height << '\n';
         n_threads = image_height;
     }
-
-    int vt_escape_status = enable_vt_escapes();
 
     auto raw_bmp = bitmap(image_width, image_height);
 
@@ -131,12 +133,17 @@ bitmap camera::render(const hittable &world, int n_threads) {
 }
 
 bitmap camera::render(const hittable &world) {
+    // Returns 0 if success/no-op, -1 if unavailable, positive error otherwise
+    int vt_escape_status = enable_vt_escapes();
+
     // I have to make sure it isn't trying to run 2 jobs at once (data race!)
     // This may be locked twice within the same thread if called from the MT renderer method.
     std::unique_lock<std::recursive_mutex> render_lock(render_mutex, std::try_to_lock);
 
     if (!render_lock) {
-        std::clog << "Warning: Trying to render when already rendering! "
+        // The "WARNING" text shows in bold red if ANSI escapes are available
+        std::clog << (vt_escape_status==0? "\033[1;31mWARNING\033[0m" : "WARNING")
+                  << ": Trying to render when already rendering! "
                      "Thread will hang until previous job finishes.\n";
         // Hangs until existing job is complete.
         render_lock.lock();
@@ -144,8 +151,6 @@ bitmap camera::render(const hittable &world) {
 
     initialize();
 
-    // Returns 0 if success/no-op, -1 if unavailable, positive error otherwise
-    int vt_escape_status = enable_vt_escapes();
 
     // Fill in with code from main()
     auto raw_bmp = bitmap(image_width, image_height);

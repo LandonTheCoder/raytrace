@@ -2,3 +2,6 @@ out
 *.ppm
 .*.swp
 subprojects/packagecache
+subprojects/libjpeg-turbo-*
+subprojects/libpng-*
+subprojects/zlib-*

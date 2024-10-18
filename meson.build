@@ -1,4 +1,4 @@
-project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.4',
+project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.5',
         meson_version: '>= 0.59.0',
         default_options: ['cpp_std=c++20', 'default_library=static'])
 # I put the default options up there because it doesn't seem to work otherwise.
@@ -73,11 +73,14 @@ rt_main_files = ['args.c++',
                  'sphere.c++']
 
 # I don't need most of this stuff for ppm-example, just link the necessary ones.
-executable('gradient-test.c++',
+executable('gradient-test',
            'gradient-test.c++',
            'args.c++',
            'bitmap.c++',
            'quirks.c',
            os_inputs,
-           dependencies: deps)
-executable('raytracer', 'raytracer.c++', rt_main_files, os_inputs, dependencies: deps)
+           dependencies: deps, install: true)
+executable('raytracer',
+           'raytracer.c++',
+           rt_main_files, os_inputs,
+           dependencies: deps, install: true)

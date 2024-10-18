@@ -15,6 +15,12 @@ I highly suggest you supply a buildtype option or it will be painfully slow. By 
 
 Even the debugoptimized buildtype reduced image generation time from 51 seconds to 12.7 seconds (as of Ch. 13.2). The release buildtype brought it down to 12.5 seconds. Minsize resulted in 14.4 seconds on my system, so it may not make as much sense for you (because it won't do some things that can increase size like loop unrolling).
 
+I have added a wrap dependency system to help support Windows builds. If you don't have pkg-config/pkgconf installed, and libpng/libjpeg-turbo aren't available systemwide, you may want to set `--wrapmode=forcefallback` to make dependency resolution faster.
+
+If it is set up to build libpng and libjpeg-turbo as DLLs, you may have to use `meson devenv` to get a shell to run it, or it will fail to find the necessary DLLs. This doesn't apply if linking against system libraries (or statically).
+
+The performance of writing to a terminal is much worse on Windows (tested in Windows Terminal), but this seems unavoidable.
+
 ### Speed Test: Final version ###
 The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
 
@@ -28,7 +34,7 @@ The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
 ## Enhancements ##
 I have enhanced it so that it can take arguments specifying an output file, supporting PPM, BMP, and (optionally) PNG and JPEG.
 
-I have some quirks to help support Windows, but it isn't tested on Windows.
+I have some quirks to help support Windows, but I'm still testing Windows support.
 
 ## Results ##
 This is rendered at 1200×675 px, 500 samples per pixel (see `raytracer.c++`), and output in JPEG (quality 95). The renders are stored in the `examples/` folder.

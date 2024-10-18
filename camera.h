@@ -10,6 +10,14 @@
 // For std::mutex, std::recursive_mutex
 #include <mutex>
 
+/* Note for thread safety:
+ * It is *not* thread safe to change public variables while a render is running.
+ * If you need to access camera from multiple threads, lock the render mutex
+ * before changing the variables or doing a render.
+ * This ensures that variables remain the same for the running render job until
+ * it finishes. (The render job itself takes this lock, which can be taken
+ * multiple times within the same thread.)
+ */
 class camera {
   public:
     // Place public camera parameters here.
@@ -26,6 +34,8 @@ class camera {
 
     double defocus_angle = 0; // Variation angle of rays through each pixel
     double focus_dist = 10; // Distance from camera's lookfrom to plane of perfect focus
+
+    std::recursive_mutex render_mutex; // Blocks doing multiple incompatible renders at once.
 
     // Single-threaded renderer
     bitmap render(const hittable &world);
@@ -46,7 +56,6 @@ class camera {
 
     // Multithreading extensions
     std::mutex counter_mutex; // Locks counter variable, and access to stdout
-    std::recursive_mutex render_mutex; // Only 1 render from this camera at once.
     int lines_remaining = -1; // Stores remaining lines for multithreaded mode.
 
     // line_begin and line_end use inedxing conventions.

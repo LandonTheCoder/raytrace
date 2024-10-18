@@ -15,6 +15,11 @@ enum BitmapOutputType { BMPOUT_TERMINATOR, BMPOUT_PPM, BMPOUT_BMP, BMPOUT_PNG, B
  * Includes functions to serialize as a few different formats.
  * Note that the instantiated bitmap class must outlive any pointers to
  * pixel_data or it will be use-after-free.
+ *
+ * Thread-Safety: It is thread-safe to write to non-overlapping portions of
+ * this image from different threads, but it is *not* thread-safe to modify
+ * the image while writing to a file (because there is no guarantee of whether
+ * the original or modified pixel is read by the writer).
  */
 class bitmap {
   public:

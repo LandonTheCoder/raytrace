@@ -21,6 +21,7 @@ The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
  - plain (No options): 15 hours 24 minutes 6.34 seconds
  - debug (-O0 -g): 15 hours 24 minutes 6.32 seconds
  - debugoptimized (-O2 -g): 2 hours 9 minutes 35.94 seconds
+ - debugoptimized (-O2 -g), 4 threads: 46 minutes 48.51 seconds (almost 3 times as fast)
  - release (-O3): 2 hours 9 minutes 6.97 seconds
  - minsize (-Os -g): 2 hours 14 minutes 6.38 seconds
 

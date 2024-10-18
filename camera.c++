@@ -68,7 +68,7 @@ bitmap camera::render(const hittable &world, int n_threads) {
         n_threads = nproc;
     }
     if (n_threads == 1) {
-        std::clog << "Using a single thread, falling back to single-threaded implementation.\n";
+        std::clog << "Using single-threaded implementation.\n";
         // This is done before camera::initialize() to avoid any change in behavior.
         auto raw_bmp = render(world);
         return raw_bmp;
@@ -86,7 +86,7 @@ bitmap camera::render(const hittable &world, int n_threads) {
 
     auto raw_bmp = bitmap(image_width, image_height);
 
-    std::clog << "Running " << n_threads << " threads.\n";
+    std::clog << "Using " << n_threads << " threads.\n";
 
     auto block_size = image_height / n_threads;
     auto block_remainder = image_height % n_threads; // Assigned to the last thread

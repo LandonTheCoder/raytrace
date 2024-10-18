@@ -148,7 +148,8 @@ void bitmap::write_to_file(std::ostream &out, BitmapOutputType filetype) {
         write_as_ppm(out);
         break;
       case BMPOUT_BMP:
-        write_as_bmp_btt(out);
+        // bitmap::write_as_bmp_btt() has a bug that causes parsing failures.
+        write_as_bmp_ttb(out);
         break;
       case BMPOUT_PNG:
         write_as_png(out);
@@ -224,6 +225,7 @@ void bitmap::write_as_bmp_ttb(std::ostream &out) {
 }
 
 // Writes out bitmap to BMP, written bottom-to-top order.
+// This has some bug somewhere.
 void bitmap::write_as_bmp_btt(std::ostream &out) {
     int new_row_multiple = image_width * 3;
     // To be used as padding with padding_size
@@ -233,6 +235,7 @@ void bitmap::write_as_bmp_btt(std::ostream &out) {
     int filled_row_size = new_row_multiple + padding_size;
 
     int bmp_pxtable_size = filled_row_size * image_height;
+    std::clog << "bmp_header is " << sizeof(struct bmp_header) << '\n';
     int bmp_file_size = bmp_pxtable_size + sizeof(struct bmp_header);
     struct bmp_header hdr = {.type = 0x4d42, .bmp_size = bmp_file_size,
                              .reserved_1 = 0, .reserved_2 = 0,

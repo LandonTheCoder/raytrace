@@ -140,7 +140,8 @@ int main(int argl, char **args) {
         raw_bmp.write_as_ppm(outstream);
     } else if (pargs.ftype == BMPOUT_BMP) {
         // The officially preferred way to write BMP is bottom-to-top row order.
-        raw_bmp.write_as_bmp_btt(outstream);
+        // However, I have a bug in its implementation and am using top-to-bottom.
+        raw_bmp.write_as_bmp_ttb(outstream);
     } else if (pargs.ftype == BMPOUT_PNG) {
         // I need to test if this works.
         raw_bmp.write_as_png(outstream);

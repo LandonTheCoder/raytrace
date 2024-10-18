@@ -102,7 +102,7 @@ int main(int argl, char **args) {
     if (pargs.ftype == BMPOUT_PPM) {
         raw_bmp.write_as_ppm(outstream);
     } else if (pargs.ftype == BMPOUT_BMP) {
-        raw_bmp.write_as_bmp_btt(outstream);
+        raw_bmp.write_as_bmp_ttb(outstream);
     } else if (pargs.ftype == BMPOUT_PNG) {
         raw_bmp.write_as_png(outstream);
     } else if (pargs.ftype == BMPOUT_JPEG) {

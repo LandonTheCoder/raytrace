@@ -32,7 +32,7 @@ static void print_win_err(const char *func_name, uint32_t err) {
                   FORMAT_MESSAGE_IGNORE_INSERTS,
                   NULL,
                   err,
-                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // User's language
                   (LPTSTR) &msg_buf, 0, NULL);
     // msg_buf is a wchar_t * if UNICODE is defined, else char *.
 #ifdef UNICODE
@@ -185,6 +185,7 @@ char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
         print_win_err("WideCharToMultiByte", err);
         return NULL;
     }
+    return retarg;
 }
 
 #else

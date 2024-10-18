@@ -1,8 +1,6 @@
 project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.1',
-        default_options: ['cpp_std=c++20',
-                          'libjpeg-turbo:default_library=static',
-                          'libpng:default_library=static',
-                          'zlib:default_library=static'])
+        meson_version: '>= 0.59.0',
+        default_options: ['cpp_std=c++20', 'default_library=static'])
 # I put the default options up there because it doesn't seem to work otherwise.
 # I want to avoid DLLs because it makes it annoying to work with on Windows
 # because "DLL not found".

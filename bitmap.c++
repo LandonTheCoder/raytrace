@@ -353,7 +353,7 @@ void bitmap::write_as_png(std::ostream &out) {
         png_error(png_ptr, "Image is too tall to process in memory");
 
     for (int index = 0; index < image_height; index++) {
-        row_pointers[index] = pixel_data + index * image_width * 3;
+        row_pointers[index] = pixel_data.get() + index * image_width * 3;
     }
 
     png_write_image(png_ptr, row_pointers);
@@ -396,7 +396,7 @@ void bitmap::write_as_jpeg(std::ostream &out) {
 
     // This is the important one.
     val_check = tj3Compress8(j_handle,
-                             pixel_data, // Note: it expects a linear top-to-bottom framebuffer here.
+                             pixel_data.get(), // Note: it expects a linear top-to-bottom framebuffer here.
                              image_width,
                              0, // The "pitch", which is autoderived here to 3 * image_width
                              image_height,
@@ -474,7 +474,7 @@ void bitmap::write_as_jpeg(std::ostream &out) {
     jpeg_start_compress(&j_comp, true); // True ensures a full JPEG
 
     for (int index = 0; index < image_height; index++) {
-        row_pointers[index] = pixel_data + index * image_width * 3;
+        row_pointers[index] = pixel_data.get() + index * image_width * 3;
     }
 
     int check = jpeg_write_scanlines(&j_comp, row_pointers, image_height);

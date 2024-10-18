@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <iostream>
 #include <cstdio>
+// For std::unique_ptr<>
+#include <memory>
 
 // To allow querying supported types at runtime. BMPOUT_TERMINATOR is to
 // determine the end of a supported_type_list.
@@ -17,18 +19,15 @@ enum BitmapOutputType { BMPOUT_TERMINATOR, BMPOUT_PPM, BMPOUT_BMP, BMPOUT_PNG, B
 class bitmap {
   public:
     // Goes from left-to-right, top-to-bottom, in RGB order (8 bpc, 24bpp)
-    uint8_t *pixel_data;
+    std::unique_ptr<uint8_t[]> pixel_data;
 
     bitmap(int image_width, int image_height) {
         this->image_width = image_width;
         this->image_height = image_height;
         // 3 bytes for a 24bpp pixel
         this->raw_size = image_width * image_height * 3;
-        // Is there a safer way to do this?
-        pixel_data = new uint8_t [this->raw_size];
-    }
-    ~bitmap() {
-        delete pixel_data;
+        // I use a unique_ptr<> because I need sane move semantics.
+        pixel_data = std::make_unique<uint8_t[]>(this->raw_size);
     }
 
     int get_image_width() {

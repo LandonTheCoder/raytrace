@@ -73,8 +73,8 @@ rt_main_files = ['args.c++',
                  'sphere.c++']
 
 # I don't need most of this stuff for ppm-example, just link the necessary ones.
-executable('render-example',
-           'render-example.c++',
+executable('gradient-test.c++',
+           'gradient-test.c++',
            'args.c++',
            'bitmap.c++',
            'quirks.c',

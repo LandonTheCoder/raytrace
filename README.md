@@ -9,22 +9,22 @@ The basic gist of what I'm doing is:
 This is based on the Ray Tracing in One Weekend tutorial, with a few modifications added for flexibility (such as modifying it so that it can output to formats other than PPM, with room for expansion).
 
 ## Build Options ##
-I have 2 options: the "png" feature, which enables/disables libpng support (to enable writing PNG files), and the "jpeg" feature, which enables/disables libjpeg/libjpeg-turbo support (which enables writing JPEG files). I will use options to allow picking optional features (like image-format support).
+I have 3 options: the "png" feature, which enables/disables libpng support (to enable writing PNG files), the "jpeg" feature, which enables/disables libjpeg/libjpeg-turbo support (which enables writing JPEG files), and the "turbojpeg" feature, which selects which JPEG implementation to use (preferring TurboJPEG 3 but falling back to libjpeg by default if it isn't available). I will use options to allow picking optional features (like image-format support).
 
 I highly suggest you supply a buildtype option or it will be painfully slow. By default, it uses "--buildtype debug" which provides no optimization options at all. I highly suggest using either the debugoptimized buildtype (equivalent to -O2 -g), the release buildtype (equivalent to -O3), or maybe minsize if you are space/cache-constrained (equivalent to -Os -g).
 
 Even the debugoptimized buildtype reduced image generation time from 51 seconds to 12.7 seconds (as of Ch. 13.2). The release buildtype brought it down to 12.5 seconds. Minsize resulted in 14.4 seconds on my system, so it may not make as much sense for you (because it won't do some things that can increase size like loop unrolling).
 
-I have added a wrap dependency system to help support Windows builds. If you don't have pkg-config/pkgconf installed, and libpng/libjpeg-turbo aren't available systemwide, you may want to set `--wrapmode=forcefallback` to make dependency resolution faster. If you want to only use system dependencies, use the `--wrapmode=nofallback` option (which disables fetching external dependencies and only uses system dependencies).
+I have added a wrap dependency system to help support Windows builds. If you don't have pkg-config/pkgconf installed, and libpng/libjpeg-turbo aren't available systemwide, you may want to set `--wrapmode=forcefallback` to make dependency resolution faster. If you want to only use system dependencies, use the `--wrapmode=nofallback` option, which disables fetching external dependencies and only uses system dependencies.
 
-If it is set up to build libpng and libjpeg-turbo as DLLs, you may have to use `meson devenv` to get a shell to run it, or it will fail to find the necessary DLLs. This doesn't apply if linking against system libraries (or statically). You can set it up to build them as DLLs by giving the option default\_library=shared (as in `meson setup BUILDDIR -D default_library=shared`). To make this easier, it is set up to build subprojects as static by default.
+If it is set up to build libpng and libjpeg-turbo as DLLs, you may have to use `meson devenv` to get a shell to run it, or it will fail to find the necessary DLLs. Note that you have to do this again after every reconfigure. This doesn't apply if linking against system libraries (or statically). You can set it up to build them as DLLs by giving the option default\_library=shared (as in `meson setup BUILDDIR -D default_library=shared`). To make this easier, it is set up to build subprojects as static by default.
 
 Build options can be passed to dependencies like `meson setup -D libjpeg-turbo:tests=enabled`.
 
-The performance of writing to a terminal is much worse on Windows (tested in Windows Terminal), but this seems unavoidable.
+The performance of writing to a terminal/console is much worse on Windows (tested in Windows Terminal), but this seems unavoidable. This can cause it to run slower on Windows because it has to wait on console output to finish.
 
 ### Speed Test: Final version ###
-The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format.
+The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format. This was tested on my Linux system, results on Windows may differ.
 
  - plain (No options): 15 hours 24 minutes 6.34 seconds
  - debug (-O0 -g): 15 hours 24 minutes 6.32 seconds

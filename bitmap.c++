@@ -225,7 +225,6 @@ void bitmap::write_as_bmp_ttb(std::ostream &out) {
 }
 
 // Writes out bitmap to BMP, written bottom-to-top order.
-// This has some bug somewhere.
 void bitmap::write_as_bmp_btt(std::ostream &out) {
     int new_row_multiple = image_width * 3;
     // To be used as padding with padding_size
@@ -258,7 +257,7 @@ void bitmap::write_as_bmp_btt(std::ostream &out) {
     int top_row = new_row_multiple * (image_height - 1);
     // Future idea: write a full row at a time, buffered beforehand.
 
-    for (int row_index = top_row; row_index > 0; row_index -= new_row_multiple) {
+    for (int row_index = top_row; row_index >= 0; row_index -= new_row_multiple) {
         // We iterate forward through the row, but rows count backwards.
         for (int offset = 0; offset < new_row_multiple; offset += 3) {
             int index = row_index + offset;

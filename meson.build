@@ -1,9 +1,12 @@
-project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.2',
+project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.3',
         meson_version: '>= 0.59.0',
         default_options: ['cpp_std=c++20', 'default_library=static'])
 # I put the default options up there because it doesn't seem to work otherwise.
 # I want to avoid DLLs because it makes it annoying to work with on Windows
 # because "DLL not found".
+
+cc = meson.get_compiler('c')
+cxx = meson.get_compiler('cpp')
 
 conf_data = configuration_data()
 
@@ -45,9 +48,6 @@ deps = [png_dep, jpeg_dep]
 # Files linked in which are OS-specific
 os_inputs = []
 
-# Compiler-specific arguments. (MSVC won't take .c++ files without being told to.)
-cpp_args = []
-
 # OS-specific stuff
 if host_machine.system() == 'windows'
     windows = import('windows')
@@ -55,10 +55,10 @@ if host_machine.system() == 'windows'
     resource_file = windows.compile_resources('arch/win/raytracer.rc',
                                               depend_files: resource_depends)
     os_inputs += resource_file
-    cxx = meson.get_compiler('cpp')
     if cxx.get_argument_syntax() == 'msvc'
         # All files on command line are C++ (including *.c++)
-        cpp_args += '/TP'
+        # MSVC thinks that file.c++ is an object file, set it straight here.
+        add_project_arguments('/TP', language: ['cpp'])
     endif
 endif
 
@@ -79,6 +79,5 @@ executable('render-example',
            'bitmap.c++',
            'quirks.c',
            os_inputs,
-           cpp_args: cpp_args,
            dependencies: deps)
-executable('raytracer', 'raytracer.c++', rt_main_files, os_inputs, cpp_args: cpp_args, dependencies: deps)
+executable('raytracer', 'raytracer.c++', rt_main_files, os_inputs, dependencies: deps)

@@ -15,7 +15,7 @@ I highly suggest you supply a buildtype option or it will be painfully slow. By 
 
 Even the debugoptimized buildtype reduced image generation time from 51 seconds to 12.7 seconds (as of Ch. 13.2). The release buildtype brought it down to 12.5 seconds. Minsize resulted in 14.4 seconds on my system, so it may not make as much sense for you (because it won't do some things that can increase size like loop unrolling).
 
-I have added a wrap dependency system to help support Windows builds. If you don't have pkg-config/pkgconf installed, and libpng/libjpeg-turbo aren't available systemwide, you may want to set `--wrapmode=forcefallback` to make dependency resolution faster.
+I have added a wrap dependency system to help support Windows builds. If you don't have pkg-config/pkgconf installed, and libpng/libjpeg-turbo aren't available systemwide, you may want to set `--wrapmode=forcefallback` to make dependency resolution faster. If you want to only use system dependencies, use the `--wrapmode=nofallback` option (which disables fetching external dependencies and only uses system dependencies).
 
 If it is set up to build libpng and libjpeg-turbo as DLLs, you may have to use `meson devenv` to get a shell to run it, or it will fail to find the necessary DLLs. This doesn't apply if linking against system libraries (or statically).
 

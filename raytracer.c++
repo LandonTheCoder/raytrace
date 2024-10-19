@@ -16,6 +16,10 @@
 #include "args.h"
 // OS-specific workarounds/quirks
 #include "quirks.h"
+// Line printer functions
+#define INCLUDE_REAL_PRINTER_FUNCS
+#include "print-line-counter.h"
+#undef INCLUDE_REAL_PRINTER_FUNCS
 
 #include <iostream>
 // For std::ofstream
@@ -26,6 +30,12 @@ int main(int argl, char **args) {
     int locale_is_good = ensure_locale();
     // Returns 0 if success/no-op, -1 if unavailable, positive error code otherwise.
     int vt_escape_status = enable_vt_escapes();
+    // Select line printer function
+    line_printer = vt_escape_status==0?
+                   print_lines_remaining_ansi :
+                   print_lines_remaining_plain;
+    // Select done printer function
+    done_printer = vt_escape_status==0? print_done_ansi: print_done_plain;
     // This *should* make sure Windows doesn't clobber binary files written to std::cout.
     fix_stdout();
 

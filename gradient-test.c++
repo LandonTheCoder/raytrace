@@ -6,6 +6,10 @@
 #include "args.h"
 // For testing workarounds/quirks
 #include "quirks.h"
+// For line counter
+#define INCLUDE_REAL_PRINTER_FUNCS
+#include "print-line-counter.h"
+#undef INCLUDE_REAL_PRINTER_FUNCS
 
 #include <iostream>
 // For std::ofstream
@@ -40,6 +44,12 @@ int main(int argl, char **args) {
     int locale_is_good = ensure_locale();
     // Returns 0 if success/no-op, -1 if unavailable, positive error code otherwise.
     int vt_escape_status = enable_vt_escapes();
+    // Select line printer function
+    line_printer = vt_escape_status==0?
+                   print_lines_remaining_ansi :
+                   print_lines_remaining_plain;
+    // Select done printer function
+    done_printer = vt_escape_status==0? print_done_ansi: print_done_plain;
     fix_stdout();
 
     struct args pargs = parse_args(argl, args);
@@ -84,9 +94,10 @@ int main(int argl, char **args) {
 
     auto raw_bmp = bitmap(image_width, image_height);
 
+    print_first_lines_remaining(image_height);
     // PPM is written left-to-right, top-to-bottom.
     for (int j = 0; j < image_height; j++) {
-        std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+        line_printer(image_height - j);
         for (int i = 0; i < image_width; i++) {
             auto pixel_color = color(double(i) / (image_width - 1), double(j) / (image_height - 1), 0.0);
 
@@ -109,11 +120,5 @@ int main(int argl, char **args) {
         raw_bmp.write_as_jpeg(outstream);
     }
 
-    if (vt_escape_status == 0) {
-        // Looks nicer.
-        std::clog << "\r\033[0KDone.\n";
-    } else {
-        // Fallback output.
-        std::clog << "\rDone.                 \n";
-    }
+    done_printer();
 }

@@ -9,6 +9,8 @@
 
 // For std::mutex, std::recursive_mutex
 #include <mutex>
+// For std::atomic_int
+#include <atomic>
 
 /* Note for thread safety:
  * It is *not* thread safe to change public variables while a render is running.
@@ -55,8 +57,7 @@ class camera {
     vec3 defocus_disk_v; // Defocus disk vert. radius
 
     // Multithreading extensions
-    std::mutex counter_mutex; // Locks counter variable, and access to stdout
-    int lines_remaining = -1; // Stores remaining lines for multithreaded mode.
+    std::atomic_int lines_remaining = -1; // Stores remaining lines for multithreaded mode.
 
     // line_begin and line_end use inedxing conventions.
     void render_mt_impl(const hittable &world, bitmap &raw_bmp, int line_begin, int line_end);

@@ -49,7 +49,9 @@ Defocus blur (often called "Depth of Field" in photography) is an effect in phot
 Usually, instead of fully simulating a full sensor-lens-aperture combination and all of the complexities, raytracers usually use a "thin lens" approximation. That means that we start rays from an infinitely thin circular lens, and send them towards the pixel of interest. The viewport has to be placed on this plane for convenience purposes.
 
 ## Programming Notes ##
-std::shared\_ptr\<T\> stores an automatically refcounted pointer, and safely (hopefully?) deletes it once refcount hits 0. A shared\_ptr is initialized by assigning to it with make\_shared<T>(arguments).
+std::shared\_ptr\<T\> stores an automatically refcounted pointer, and safely (hopefully?) deletes it once refcount hits 0. A shared\_ptr is initialized by assigning to it with make\_shared\<T\>(arguments).
+
+std::unique\_ptr\<T\> stores a non-refcounted pointer that runs a destructor on it when the wrapping unique\_ptr is destroyed. It is initialized by assigning to it with make\_unique\<T\>(arguments). It can create an array with make\_unique\<T\[\]\>(array\_size).
 
 std::vector\<T\> stores a collection of a specified type in a list that grows automatically.
 

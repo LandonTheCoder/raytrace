@@ -2,6 +2,7 @@
 #include "bitmap.h"
 // For .bmp writer functions
 #include "bmp-format.h"
+// uint8_t
 #include <cstdint>
 #include <iostream>
 // In case I want to printf()
@@ -10,6 +11,8 @@
 #include "interval.h"
 // For std::sqrt()
 #include <cmath>
+// For memset()
+#include <cstring>
 
 // Determine what formats are supported.
 #include "config.h"
@@ -225,16 +228,17 @@ void bitmap::write_as_bmp_ttb(std::ostream &out) {
 }
 
 // Writes out bitmap to BMP, written bottom-to-top order.
+// This one is line-buffered, so it goes faster than the top-to-bottom writer.
 void bitmap::write_as_bmp_btt(std::ostream &out) {
     int new_row_multiple = image_width * 3;
-    // To be used as padding with padding_size
-    char padding[3] = {0, 0, 0};
+    // Determine how much padding is needed.
     int padding_size = new_row_multiple % 4;
     // It is padded to 4 bytes
     int filled_row_size = new_row_multiple + padding_size;
 
     int bmp_pxtable_size = filled_row_size * image_height;
     int bmp_file_size = bmp_pxtable_size + sizeof(struct bmp_header);
+    // Note: This assumes little-endian, fix later.
     struct bmp_header hdr = {.type = 0x4d42, .bmp_size = bmp_file_size,
                              .reserved_1 = 0, .reserved_2 = 0,
                              .pixel_offset = 0x36, // Size of header
@@ -254,21 +258,29 @@ void bitmap::write_as_bmp_btt(std::ostream &out) {
     out.write(reinterpret_cast<char *>(&hdr), sizeof(hdr));
 
     int top_row = new_row_multiple * (image_height - 1);
-    // Future idea: write a full row at a time, buffered beforehand.
 
+    // This stores the buffered row.
+    int row_buf_size = filled_row_size + padding_size;
+#ifdef HAVE_VLA
+    uint8_t row_buf[row_buf_size];
+#else
+    uint8_t *row_buf = STACK_VLARRAY(uint8_t, row_buf_size);
+#endif
+
+    // Note: row_index >= 0 is correct, it makes it write the top line.
     for (int row_index = top_row; row_index >= 0; row_index -= new_row_multiple) {
         // We iterate forward through the row, but rows count backwards.
         for (int offset = 0; offset < new_row_multiple; offset += 3) {
             int index = row_index + offset;
-            // Reverse order of pixel colors
-            uint8_t pxbuf[3] = {pixel_data[index + 2],
-                                pixel_data[index + 1],
-                                pixel_data[index]};
+            // Reverse order of pixel colors. Offset is offset within row,
+            // index is accounting for row and column.
+            row_buf[offset] = pixel_data[index + 2];
+            row_buf[offset + 1] = pixel_data[index + 1];
+            row_buf[offset + 2] = pixel_data[index];
 
-            out.write(reinterpret_cast<char *>(pxbuf), 3);
         }
-        // Since row is finished, write padding
-        out.write(padding, padding_size);
+        // Write the row.
+        out.write(reinterpret_cast<char *>(row_buf), row_buf_size);
     }
 }
 

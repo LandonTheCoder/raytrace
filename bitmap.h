@@ -11,6 +11,13 @@
 // determine the end of a supported_type_list.
 enum BitmapOutputType { BMPOUT_TERMINATOR, BMPOUT_PPM, BMPOUT_BMP, BMPOUT_PNG, BMPOUT_JPEG };
 
+// Stores a simple RGB color in a convenient structure.
+struct rgb {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
+
 /* Class for a RGB24 bitmap (R8G8B8).
  * Includes functions to serialize as a few different formats.
  * Note that the instantiated bitmap class must outlive any pointers to
@@ -46,6 +53,11 @@ class bitmap {
     // Row and column index starting from 0.
     void write_pixel_rgb(int row, int column, uint8_t r, uint8_t g, uint8_t b);
 
+    // Like above but using a unified struct rgb.
+    void write_pixel_rgb(int row, int column, struct rgb rgb) {
+        write_pixel_rgb(row, column, rgb.r, rgb.g, rgb.b);
+    }
+
     // Like write_pixel_rgb() but using a color vector instead.
     void write_pixel_vec3(int row, int column, const color &px_color);
 
@@ -53,9 +65,11 @@ class bitmap {
     void write_as_ppm(std::ostream &out);
 
     // Writes out bitmap to BMP, written top-to-bottom order.
+    // This function is slower because it is written pixel-by-pixel.
     void write_as_bmp_ttb(std::ostream &out);
 
     // Writes out bitmap to BMP, written bottom-to-top (standard) order.
+    // Note that this function is faster because it is line-buffered.
     void write_as_bmp_btt(std::ostream &out);
 
     // Writes out bitmap to a PNG (with default settings).

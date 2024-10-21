@@ -74,6 +74,8 @@ std::vector\<T\> stores a collection of a specified type in a list that grows au
    - Use std::lock\_guard\<std::mutex\> as an easy method to lock that mutex.
    - Figure out how to store the threads. Maybe in a vector?
    - For splitting up work, divide image\_height / nproc, for each thread line\_end is the line\_begin of the next one. The last thread gets the remainder.
+ - Maybe find a more efficient way to write images, like BMP color conversion. Also, tune parameters for the image writers.
+ - Rewrite quirks.c in C++, and move the line counter functions into it.
 
 ## Structure of BMP file ##
  - Bitmap file header: 14 bytes

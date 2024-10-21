@@ -16,10 +16,6 @@
 #include "args.h"
 // OS-specific workarounds/quirks
 #include "quirks.h"
-// Line printer functions
-#define INCLUDE_REAL_PRINTER_FUNCS
-#include "print-line-counter.h"
-#undef INCLUDE_REAL_PRINTER_FUNCS
 
 #include <iostream>
 // For std::ofstream

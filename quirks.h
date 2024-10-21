@@ -3,7 +3,26 @@
 // ANSI escapes by default, or "\n" -> "\r\n" replacement on stdout.
 
 #ifdef __cplusplus
+// For std::clog
+#include <iostream>
+
 extern "C" {
+// This specifies another file holds the actual pointer symbol.
+// This allows the main program to define it and the library to hold it.
+// Line printer function for usage in other functions
+extern void (*line_printer)(int);
+// Prints "Done."
+extern void (*done_printer)();
+
+static inline void print_first_lines_remaining(int lines_remaining) {
+    std::clog << "Scanlines remaining: " << lines_remaining << std::flush;
+}
+
+void print_lines_remaining_ansi(int lines_remaining);
+void print_lines_remaining_plain(int lines_remaining);
+void print_done_ansi(void);
+void print_done_plain(void);
+
 #endif
 
 /* Sets locale correctly. This ensures a locale other than the "C" locale,

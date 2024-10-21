@@ -9,8 +9,6 @@
 
 // For OS-specific workarounds/quirks
 #include "quirks.h"
-// For line counter print function(s)
-#include "print-line-counter.h"
 // assert() to notify if line_printer or done_printer are null
 #include <cassert>
 

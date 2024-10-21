@@ -7,19 +7,10 @@
 // For testing workarounds/quirks
 #include "quirks.h"
 // For line counter
-#define INCLUDE_REAL_PRINTER_FUNCS
-#include "print-line-counter.h"
-#undef INCLUDE_REAL_PRINTER_FUNCS
 
 #include <iostream>
 // For std::ofstream
 #include <fstream>
-
-struct rgb {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-};
 
 // Converts to RGB in linear space (unlike the bitmap method)
 struct rgb color_vec3_to_rgb(const color &pixel_color) {

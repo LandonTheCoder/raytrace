@@ -1,23 +1,59 @@
 // This contains per-OS functions to handle quirks.
+#include "quirks.h"
 
 // OS-agnostic includes
 // For setlocale()
 #include <locale.h>
 
+// std::clog
+#include <iostream>
+
+// OS-agnostic definitions
+// Line printer function for usage in other functions
+void (*line_printer)(int);
+// Prints "Done."
+void (*done_printer)();
+
+// Print lines remaining (ANSI-escape version, hopefully faster on Windows)
+void print_lines_remaining_ansi(int lines_remaining) {
+    // "\e[1G" moves to start of line, "\e[2K" clears from cursor to end of line.
+    std::clog << "\033[22G\033[0K" << lines_remaining << std::flush;
+}
+
+// Print lines remaining (non-ANSI-terminal version)
+// This runs *really* slowly on Windows compared to gnome-terminal.
+void print_lines_remaining_plain(int lines_remaining) {
+    std::clog << "\rScanlines remaining: "
+              << lines_remaining << ' ' << std::flush;
+}
+
+// Print "Done." (ANSI-escape version)
+void print_done_ansi(void) {
+    std::clog << "\r\033[0KDone.\n";
+}
+
+// Print "Done." (non-ANSI fallback)
+void print_done_plain(void) {
+    // Fallback when ANSI escapes are unavailable.
+    std::clog << "\rDone.                 \n";
+}
+
+// Begin OS-specific definitions
+
 #ifdef _WIN32
 // FormatMessage(), LocalFree(), GetStdHandle(), GetConsoleMode(), SetConsoleMode(), GetLastError()
 #include <windows.h>
 // int32_t
-#include <stdint.h>
+#include <cstdint>
 // printf(), wprintf()
-#include <stdio.h>
+#include <cstdio>
 // These 2 are used for _setmode and _fileno, not sure which has which.
 #include <fcntl.h>
 #include <io.h>
 
 // Internal variables
 // Widechar args, which holds arguments in UTF-16. Can be freed by LocalFree()
-wchar_t **wcargs = NULL;
+wchar_t **wcargs = nullptr;
 int wcargl = -1; // Holds length of wcargs (UTF-16 arguments)
 
 // Utility functions
@@ -30,10 +66,10 @@ static void print_win_err(const char *func_name, uint32_t err) {
     FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                   FORMAT_MESSAGE_FROM_SYSTEM |
                   FORMAT_MESSAGE_IGNORE_INSERTS,
-                  NULL,
+                  nullptr,
                   err,
                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // User's language
-                  (LPTSTR) &msg_buf, 0, NULL);
+                  (LPTSTR) &msg_buf, 0, nullptr);
     // msg_buf is a wchar_t * if UNICODE is defined, else char *.
 #ifdef UNICODE
     // %ls means wchar_t *str, %s means char *str
@@ -76,8 +112,8 @@ static struct winver get_win_version(void) {
 static void init_wcargs(void) {
     // Get widechar (UTF-16) args in a manner similar to regular args
     wcargs = CommandLineToArgvW(GetCommandLineW(), &wcargl);
-    if (wcargs == NULL)
-        fprintf(stderr, "CommandLineToArgvW failed!\n");
+    if (wcargs == nullptr)
+        std::clog << "CommandLineToArgvW failed!\n";
 }
 
 
@@ -100,7 +136,8 @@ int ensure_locale(void) {
         // UTF-8 mode (which is CP65001 in Windows)
         return 0;
     } else {
-        printf("Windows version: %i.%i build %i\n", winver.major, winver.minor, winver.build);
+        std::clog << "Windows version: " << winver.major << '.' << winver.minor
+                  << " build " << winver.build << '\n';
         // Would be CP1252 if it fails in en-US locale (so a return value of 1252 in that case)
         return active_codepage;
     }
@@ -122,6 +159,9 @@ int enable_vt_escapes(void) {
         print_win_err("GetConsoleMode", err);
         return err;
     }
+    // Escape sequences already enabled.
+    if (cons_mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+        return 0;
     // Enable escape sequence processing
     cons_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     if (!SetConsoleMode(out, cons_mode)) {
@@ -145,13 +185,17 @@ void fix_stdout(void) {
 // May return NULL (eventually crashing program) if conversion fails.
 char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
     char *retarg;
-    if (wcargs == NULL) {
+    if (wcargs == nullptr) {
         init_wcargs();
+        if (wcargs == nullptr) {
+            std::clog << "Initalization of wcargs failed, bailing out.\n";
+            return nullptr;
+        }
     }
 
     if (argl != wcargl) {
-        fprintf(stderr, "Hmm, that's weird. argl = %i, wcargl = %i. "
-                        "All bets are off.\n", argl, wcargl);
+        std::clog << "Hmm, that's weird. argl = " << argl << ", wcargl = "
+                  << wcargl << ". All bets are off.\n";
     }
     /* int WideCharToMultiByte(unsigned int codepage, uint32_t flags,
      *                         wchar_t **instr, int inlen, char **outstr,
@@ -165,25 +209,25 @@ char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
     // I need to determine allocation size.
     int alloc_sz = WideCharToMultiByte(CP_UTF8, 0, wcargs[arg_pos],
                                        -1, // null-terminated
-                                       NULL, // unused
+                                       nullptr, // unused
                                        0, // return size
-                                       NULL, // invalid otherwise
-                                       NULL); // Ditto
+                                       nullptr, // invalid otherwise
+                                       nullptr); // Ditto
     if (alloc_sz == 0) {
         uint32_t err = GetLastError();
         print_win_err("WideCharToMultiByte (size check)", err);
         // This means it crashes when I try to use the argument.
         // For example, when attempting to open the file.
-        return NULL;
+        return nullptr;
     }
-    retarg = (char *) malloc(alloc_sz);
+    retarg = new char[alloc_sz];
     // Actually do conversion with appropriately sized buffer
     int status = WideCharToMultiByte(CP_UTF8, 0, wcargs[arg_pos], -1, retarg,
-                                     alloc_sz, NULL, NULL);
+                                     alloc_sz, nullptr, nullptr);
     if (status == 0) {
         uint32_t err = GetLastError();
         print_win_err("WideCharToMultiByte", err);
-        return NULL;
+        return nullptr;
     }
     return retarg;
 }

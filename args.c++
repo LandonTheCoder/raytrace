@@ -41,6 +41,11 @@ static void print_help(bool is_err, char *progname) {
     output << ")\n";
 }
 
+// This class adds a few methods to string_view for convenience. It is
+// otherwise the same. It adds case-insensitive ends_with() and fallbacks to
+// enable C++17 support to be optionally used.
+
+// To-Do: Make clone of operator ""sv?
 class StringView: virtual public std::string_view {
   public:
     // This means I get constructor from std::string_view.
@@ -55,7 +60,8 @@ class StringView: virtual public std::string_view {
     using std::string_view::operator=;
 
 #ifndef __cpp_lib_starts_ends_with
-    // Fallback implementation for C++17
+    // Fallback implementation of starts_with()/ends_with() for C++17.
+    // May be needed for older compilers.
     constexpr bool starts_with(std::string_view sv) const noexcept {
         if (length() < sv.length())
             return false;

@@ -4,13 +4,16 @@
 #include "interval.h"
 // For struct args, parse_args()
 #include "args.h"
-// For testing workarounds/quirks
+// For testing workarounds/quirks, line counter
 #include "quirks.h"
-// For line counter
 
 #include <iostream>
 // For std::ofstream
 #include <fstream>
+// For signal handling
+#include <csignal>
+// For std::filesystem::path (used in signal handler)
+#include <filesystem>
 
 // Converts to RGB in linear space (unlike the bitmap method)
 struct rgb color_vec3_to_rgb(const color &pixel_color) {
@@ -28,6 +31,8 @@ struct rgb color_vec3_to_rgb(const color &pixel_color) {
     // Return components
     return {.r = rbyte, .g = gbyte, .b = bbyte};
 }
+
+static std::filesystem::path fpath;
 
 // This is like ppm-example but not hardcoded for ppm to stdout.
 int main(int argl, char **args) {
@@ -74,6 +79,17 @@ int main(int argl, char **args) {
         out_file.open(pargs.fname, std::ios_base::out
                                    | std::ios_base::binary
                                    | std::ios_base::trunc);
+        fpath = std::filesystem::path(pargs.fname);
+        // It doesn't let me use closures :(
+        // I want to delete the empty file when I exit.
+        std::signal(SIGINT, [](int signum) -> void {
+            // Note: This is not tested on Windows, it may refuse to delete
+            // while open. Alternative ideas in case of failure: Maybe close
+            // explicitly, or use POSIX unlink (needs #define unlink _unlink
+            // on Windows). unlink() on Windows makes it delete upon close.
+            std::filesystem::remove(fpath);
+            std::exit(0);
+        });
     }
 
     // Image

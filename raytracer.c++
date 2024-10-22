@@ -20,6 +20,12 @@
 #include <iostream>
 // For std::ofstream
 #include <fstream>
+// For signal handler (to delete the file upon exit)
+#include <csignal>
+// For std::filesystem::path (to handle deleting it)
+#include <filesystem>
+
+static std::filesystem::path fpath;
 
 int main(int argl, char **args) {
     // Setup quirks to help ensure the environment
@@ -66,6 +72,17 @@ int main(int argl, char **args) {
         out_file.open(pargs.fname, std::ios_base::out
                                    | std::ios_base::binary
                                    | std::ios_base::trunc);
+        fpath = std::filesystem::path(pargs.fname);
+        // It doesn't let me use closures :(
+        // I want to delete the empty file when I exit.
+        std::signal(SIGINT, [](int signum) -> void {
+            // Note: This is not tested on Windows, it may refuse to delete
+            // while open. Alternative ideas in case of failure: Maybe close
+            // explicitly, or use POSIX unlink (needs #define unlink _unlink
+            // on Windows). unlink() on Windows makes it delete upon close.
+            std::filesystem::remove(fpath);
+            std::exit(0);
+        });
     }
 
     // Image size settings are now in camera.h and camera.c++

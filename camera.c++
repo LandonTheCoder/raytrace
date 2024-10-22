@@ -107,11 +107,11 @@ bitmap camera::render(const hittable &world, int n_threads) {
         if (tid == n_threads - 1)
             end_idx += block_remainder;
 
-        // thread_list runs the constructor itself.
-        thread_list.push_back(std::thread(&camera::render_mt_impl, this,
-                                          std::cref(world),
-                                          std::ref(raw_bmp),
-                                          begin_idx, end_idx));
+        // thread_list runs the constructor itself for vector::emplace_back().
+        thread_list.emplace_back(&camera::render_mt_impl, this,
+                                 std::cref(world),
+                                 std::ref(raw_bmp),
+                                 begin_idx, end_idx);
 
         begin_idx = end_idx;
         end_idx += block_size;

@@ -41,27 +41,89 @@ static void print_help(bool is_err, char *progname) {
     output << ")\n";
 }
 
-// Case-insensitive "ends with" checking, needed to match extensions without using a regex.
-static bool iendswith(std::string_view bigstr, std::string_view matchstr) {
-    int bigchar, matchchar;
-    // Semantically like len(bigstr) in Python
-    int bigsize = bigstr.length();
-    int matchsize = matchstr.length();
-    // Matched string can't be larger than the main string
-    if (bigsize < matchsize)
-        return false;
-    // This evaluates like Python index bigstr[-matchsize]
-    int bigstr_offset = bigsize - matchsize;
-    for (int index = 0; index < matchsize; index++) {
-        // I need to check that bigchar is correct, so do a bounds check
-        bigchar = tolower(bigstr.at(index + bigstr_offset));
-        // No bounds check necessary for matchstr.
-        matchchar = tolower(matchstr[index]);
-        if (bigchar != matchchar)
+class StringView: virtual public std::string_view {
+  public:
+    // This means I get constructor from std::string_view.
+    using std::string_view::string_view;
+    // I need assignment operator
+    using std::string_view::operator=;
+
+#ifndef __cpp_lib_starts_ends_with
+    // Fallback implementation for C++17
+    constexpr bool starts_with(std::string_view sv) const noexcept {
+        if (length() < sv.length())
+            return false;
+        // Like substr(0, sv.length()).compare(sv)
+        // string_view::compare() is like strcmp()
+        if (compare(0, sv.length(), sv) == 0)
+            return true;
+        else
             return false;
     }
-    return true;
-}
+    constexpr bool starts_with(const char *str) const noexcept {
+        std::string_view sv(str);
+        return starts_with(sv);
+    }
+    constexpr bool starts_with(char c) const noexcept {
+        if (!empty())
+            return front() == c;
+        else
+            return false;
+    }
+    constexpr bool ends_with(std::string_view sv) const noexcept {
+        if (length() < sv.length())
+            return false;
+        // This is like self[-len(sv):], and result is like strcmp()
+        if (compare(length() - sv.length(), length(), sv) == 0)
+            return true;
+        else
+            return false;
+    }
+    constexpr bool ends_with(const char *str) const noexcept {
+        std::string_view sv(str);
+        return ends_with(sv);
+    }
+    constexpr bool ends_with(char c) const noexcept {
+        if (!empty())
+            return back() == c;
+        else
+            return false;
+    }
+#endif
+
+    // Case-insensitive "ends with" checking, needed to match extensions without using a regex.
+    constexpr bool iends_with(std::string_view matchstr) {
+        int bigchar, matchchar;
+        // Semantically like len(bigstr) in Python
+        int matchsize = matchstr.length();
+        // Matched string can't be larger than the main string
+        if (length() < matchstr.length())
+            return false;
+        // This evaluates like Python index bigstr[-matchsize]
+        int bigstr_offset = length() - matchstr.length();
+        for (int index = 0; index < matchsize; index++) {
+            // I need to check that bigchar is correct, so do a bounds check
+            bigchar = tolower(at(index + bigstr_offset));
+            // No bounds check necessary for matchstr.
+            matchchar = tolower(matchstr[index]);
+            if (bigchar != matchchar)
+                return false;
+        }
+        return true;
+    }
+    constexpr bool iends_with(const char *str) {
+        std::string_view sv(str);
+        return iends_with(sv);
+    }
+    constexpr bool iends_with(char c) {
+        if (!empty()) {
+            auto bigchar = tolower(back());
+            auto matchchar = tolower(c);
+            return bigchar == matchchar;
+        } else
+            return false;
+    }
+};
 
 struct args parse_args(int argl, char **args) {
     // Check number of threads. If unassessable, it returns 0, which is changed to 1.
@@ -93,9 +155,9 @@ struct args parse_args(int argl, char **args) {
      */
     for (int index = 1; index < argl; index++) {
         // This makes it easier to deal with.
-        std::string_view sv(args[index]);
-        std::string_view type_name;
-        std::string_view thread_num_string;
+        StringView sv(args[index]);
+        StringView type_name;
+        StringView thread_num_string;
         bool set_type = false;
         bool set_fname = false;
         bool set_thread_num = false;
@@ -170,18 +232,18 @@ struct args parse_args(int argl, char **args) {
             parsed_args.fname_pos = index;
 
             if (!type_is_set_explicitly) {
-                if (iendswith(sv, ".bmp"sv))
+                if (sv.iends_with(".bmp"sv))
                     parsed_args.ftype = BMPOUT_BMP;
-                else if (iendswith(sv, ".ppm"sv))
+                else if (sv.iends_with(".ppm"sv))
                     parsed_args.ftype = BMPOUT_PPM;
-                else if (iendswith(sv, ".png"sv)) {
+                else if (sv.iends_with(".png"sv)) {
                     parsed_args.ftype = BMPOUT_PNG;
                     if (!bitmap::type_is_supported(BMPOUT_PNG)) {
                         print_help(true, args[0]);
                         std::clog << "PNG support not built in.\n";
                         exit(4);
                     }
-                } else if (iendswith(sv, ".jpg"sv)) {
+                } else if (sv.iends_with(".jpg"sv)) {
                     parsed_args.ftype = BMPOUT_JPEG;
                     if (!bitmap::type_is_supported(BMPOUT_JPEG)) {
                         print_help(true, args[0]);

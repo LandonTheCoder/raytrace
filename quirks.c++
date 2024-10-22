@@ -55,6 +55,9 @@ void print_done_plain(void) {
 // Widechar args, which holds arguments in UTF-16. Can be freed by LocalFree()
 wchar_t **wcargs = nullptr;
 int wcargl = -1; // Holds length of wcargs (UTF-16 arguments)
+// Holds cached reconverted args to save memory
+char **conv_args = nullptr;
+int conv_argl = -1;
 
 // Utility functions
 
@@ -114,6 +117,11 @@ static void init_wcargs(void) {
     wcargs = CommandLineToArgvW(GetCommandLineW(), &wcargl);
     if (wcargs == nullptr)
         std::clog << "CommandLineToArgvW failed!\n";
+    else {
+        conv_argl = wcargl;
+        // Ensures pointers go to NULL
+        conv_args = new char *[conv_argl]{nullptr};
+    }
 }
 
 
@@ -206,6 +214,11 @@ char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
      *  - https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-widechartomultibyte
      *  - https://learn.microsoft.com/en-us/windows/win32/winprog/windows-data-types
      */
+    // Check if in array, so we don't allocate it multiple times
+    if (conv_args[arg_pos] != nullptr) {
+        return conv_args[arg_pos]; // Already converted
+    }
+
     // I need to determine allocation size.
     int alloc_sz = WideCharToMultiByte(CP_UTF8, 0, wcargs[arg_pos],
                                        -1, // null-terminated
@@ -229,6 +242,8 @@ char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
         print_win_err("WideCharToMultiByte", err);
         return nullptr;
     }
+    // Store it for later use.
+    conv_args[arg_pos] = retarg;
     return retarg;
 }
 

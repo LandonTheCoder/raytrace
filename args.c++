@@ -45,6 +45,12 @@ class StringView: virtual public std::string_view {
   public:
     // This means I get constructor from std::string_view.
     using std::string_view::string_view;
+  /* To do a call to superclass constructor, it looks something like this:
+   *     StringView(): std::string_view() {}
+   *     StringView(const char *in): std::string_view(in) {}
+   * This is good to note if I need to do initialization in sub-object.
+   */
+
     // I need assignment operator
     using std::string_view::operator=;
 

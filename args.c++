@@ -46,7 +46,9 @@ static void print_help(bool is_err, char *progname) {
 // enable C++17 support to be optionally used.
 
 // To-Do: Make clone of operator ""sv?
-class StringView: virtual public std::string_view {
+// Note: virtual doesn't work when using superclass constructors on MSVC
+// That is because std::string_view constructor is constexpr.
+class StringView: public std::string_view {
   public:
     // This means I get constructor from std::string_view.
     using std::string_view::string_view;

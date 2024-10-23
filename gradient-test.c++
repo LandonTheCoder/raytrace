@@ -33,6 +33,7 @@ struct rgb color_vec3_to_rgb(const color &pixel_color) {
 }
 
 static std::filesystem::path fpath;
+static std::ofstream out_file;
 
 // This is like ppm-example but not hardcoded for ppm to stdout.
 int main(int argl, char **args) {
@@ -72,7 +73,6 @@ int main(int argl, char **args) {
         pargs.fname = temp;
     }
 
-    std::ofstream out_file;
     if (pargs.fname != nullptr) {
         // Check if this works correctly on UTF-8 clean versions of Windows
         // Binary is needed to ensure it doesn't butcher 0x0A on Windows
@@ -83,10 +83,8 @@ int main(int argl, char **args) {
         // It doesn't let me use closures :(
         // I want to delete the empty file when I exit.
         std::signal(SIGINT, [](int signum) -> void {
-            // Note: This is not tested on Windows, it may refuse to delete
-            // while open. Alternative ideas in case of failure: Maybe close
-            // explicitly, or use POSIX unlink (needs #define unlink _unlink
-            // on Windows). unlink() on Windows makes it delete upon close.
+            // Note: This is because it seems I *have* to close before deleting on Windows.
+            out_file.close();
             std::filesystem::remove(fpath);
             std::exit(0);
         });

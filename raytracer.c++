@@ -26,6 +26,7 @@
 #include <filesystem>
 
 static std::filesystem::path fpath;
+static std::ofstream out_file;
 
 int main(int argl, char **args) {
     // Setup quirks to help ensure the environment
@@ -65,7 +66,6 @@ int main(int argl, char **args) {
     }
 
     // We open file here so errors with opening are found early.
-    std::ofstream out_file;
     if (pargs.fname != nullptr) {
         // Binary is to keep Windows from changing 0x0A to {0x0D, 0x0A} in a binary file
         // Check if fname is UTF-8 on (current builds of) Windows.
@@ -76,10 +76,8 @@ int main(int argl, char **args) {
         // It doesn't let me use closures :(
         // I want to delete the empty file when I exit.
         std::signal(SIGINT, [](int signum) -> void {
-            // Note: This is not tested on Windows, it may refuse to delete
-            // while open. Alternative ideas in case of failure: Maybe close
-            // explicitly, or use POSIX unlink (needs #define unlink _unlink
-            // on Windows). unlink() on Windows makes it delete upon close.
+            // Note: This is because it seems I *have* to close before deleting on Windows.
+            out_file.close();
             std::filesystem::remove(fpath);
             std::exit(0);
         });

@@ -76,6 +76,13 @@ std::vector\<T\> stores a collection of a specified type in a list that grows au
    - For splitting up work, divide image\_height / nproc, for each thread line\_end is the line\_begin of the next one. The last thread gets the remainder.
  - Maybe find a more efficient way to write images, like BMP color conversion. Also, tune parameters for the image writers.
  - Rewrite quirks.c in C++, and move the line counter functions into it.
+ - Implement more image formats:
+   - Implement WebP lossless (see [libwebp](https://chromium.googlesource.com/webm/libwebp/+/HEAD/doc/api.md))
+     - It does have a wrapfile, but I will want to disable the cwebp, dwebp, webpinfo, webpmux program features. I need to enable libwebp (and by extension libsharpyuv). I shouldn't need libwebpdemux or libwebpdecoder (I'm only compressing), and I don't *think* I need libwebpmux. I should enable simd and threads.
+   - Implement AVIF as a lossy option that goes smaller (Note: libavif is not 1.0 yet! That may be reason to hold off on it.) See [libavif on GitHub](https://github.com/AOMediaCodec/libavif).
+     - Meson does *not* have a wrap file for libavif, so I have to self-build if I support it on Windows.
+     - To build libavif, you have to select the codec to build. For encoding, I can use libaom (`AVIF_CODEC_AOM`), librav1e (`AVIF_CODEC_RAV1E`), or SVT-AV1 (`AVIF_CODEC_SVT`). Rav1e is performance-optimized, but it has rustc/cargo as a build dependency. The libaom reference implementation requires perl and nasm to build. SVT-AV1 requires a C99 compiler, CMake, and nasm (seems to have the least build deps for Windows builds). It may be easier to figure out a way to have a prebuilt DLL, though.
+ - Refactor the code to be more library-like, move some redundancies out, etc.
 
 ## Structure of BMP file ##
  - Bitmap file header: 14 bytes

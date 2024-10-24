@@ -17,6 +17,8 @@ Even the debugoptimized buildtype reduced image generation time from 51 seconds 
 
 I have added a wrap dependency system to help support Windows builds. If you don't have pkg-config/pkgconf installed, and libpng/libjpeg-turbo aren't available systemwide, you may want to set `--wrapmode=forcefallback` to make dependency resolution faster. If you want to only use system dependencies, use the `--wrapmode=nofallback` option, which disables fetching external dependencies and only uses system dependencies.
 
+If building on Windows with libjpeg-turbo build as a wrap dependency, I suggest to set the NASM environment variable to the location of nasm before configuring. This allows libjpeg-turbo to build assembly versions of its functions for better performance.
+
 If it is set up to build libpng and libjpeg-turbo as DLLs, you may have to use `meson devenv` to get a shell to run it, or it will fail to find the necessary DLLs. Note that you have to do this again after every reconfigure. This doesn't apply if linking against system libraries (or statically). You can set it up to build them as DLLs by giving the option default\_library=shared (as in `meson setup BUILDDIR -D default_library=shared`). To make this easier, it is set up to build subprojects as static by default.
 
 Build options can be passed to dependencies like `meson setup -D libjpeg-turbo:tests=enabled`.

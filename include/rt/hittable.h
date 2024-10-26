@@ -5,6 +5,7 @@
 // For std::shared_ptr
 #include <memory>
 
+namespace rt {
 
 class material;
 
@@ -38,3 +39,5 @@ class hittable {
                      // rec is written to and saves calculation data.
                      hit_record &rec) const = 0;
 };
+
+}

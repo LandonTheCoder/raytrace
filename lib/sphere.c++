@@ -1,7 +1,11 @@
 #include <rt/sphere.h>
 
+using rt::ray;
+using rt::interval;
+using rt::hit_record;
+
 // The override keyword is only shown in the class definition (in header)
-bool sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
+bool rt::sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {
     // oc is (C - Q)
     vec3 oc = center - r.origin();
     // a, b (subbed for h), c are the variables from quadratic equation.

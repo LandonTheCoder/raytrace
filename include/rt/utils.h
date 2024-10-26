@@ -4,6 +4,7 @@
 // Currently used for std::rand()
 #include <cstdlib>
 
+namespace rt {
 // Constants
 const double infinity = std::numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;
@@ -21,4 +22,6 @@ inline double random_double() {
 inline double random_double(double min, double max) {
     // Random real between min, max inclusive
     return min + (max - min) * random_double();
+}
+
 }

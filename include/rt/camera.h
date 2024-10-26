@@ -12,6 +12,8 @@
 // For std::atomic_int
 #include <atomic>
 
+namespace rt {
+
 /* Note for thread safety:
  * It is *not* thread safe to change public variables while a render is running.
  * If you need to access camera from multiple threads, lock the render mutex
@@ -69,3 +71,5 @@ class camera {
     vec3 sample_square() const;
     point3 defocus_disk_sample() const;
 };
+
+}

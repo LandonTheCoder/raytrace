@@ -5,6 +5,8 @@
 
 #include "hittable.h"
 
+namespace rt {
+
 // Abstract class for materials
 class material {
   public:
@@ -52,3 +54,5 @@ class dielectric: public material {
     // Approximate value of reflectance for a given angle
     static double reflectance(double cosine, double refraction_index);
 };
+
+}

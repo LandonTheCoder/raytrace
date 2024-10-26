@@ -17,8 +17,10 @@
 // For std::vector
 #include <vector>
 
+using namespace rt;
+
 // Internal implementation of a renderer thread.
-void camera::render_mt_impl(const hittable &world, bitmap &raw_bmp, int line_begin, int line_end) {
+void rt::camera::render_mt_impl(const hittable &world, bitmap &raw_bmp, int line_begin, int line_end) {
     // Assume it is already initialized, and that lines_remaining is correct.
 
     for (int j = line_begin; j < line_end; j++) {
@@ -40,7 +42,7 @@ void camera::render_mt_impl(const hittable &world, bitmap &raw_bmp, int line_beg
 }
 
 // Multithreaded renderer function. It launches a set of renderer threads.
-bitmap camera::render(const hittable &world, int n_threads) {
+bitmap rt::camera::render(const hittable &world, int n_threads) {
     if (n_threads < 0)
         throw std::invalid_argument("The number of threads must be 0 or greater!");
 
@@ -129,7 +131,7 @@ bitmap camera::render(const hittable &world, int n_threads) {
     return raw_bmp;
 }
 
-bitmap camera::render(const hittable &world) {
+bitmap rt::camera::render(const hittable &world) {
     // Returns 0 if success/no-op, -1 if unavailable, positive error otherwise
     int vt_escape_status = rt::enable_vt_escapes();
 
@@ -179,7 +181,7 @@ bitmap camera::render(const hittable &world) {
 }
 
 // Initialize variables
-void camera::initialize() {
+void rt::camera::initialize() {
     image_height = int(image_width/aspect_ratio);
     image_height = (image_height < 1)? 1: image_height;
 
@@ -219,7 +221,7 @@ void camera::initialize() {
     defocus_disk_v = v * defocus_radius;
 }
 
-ray camera::get_ray(int i, int j) {
+ray rt::camera::get_ray(int i, int j) {
     /* We build a camera ray which originates from defocus disk and is directed at a
      * randomly sampled point near pixel (i, j)
      */
@@ -235,13 +237,13 @@ ray camera::get_ray(int i, int j) {
     return ray(ray_origin, ray_direction);
 }
 
-vec3 camera::sample_square() const {
+vec3 rt::camera::sample_square() const {
     // Returns vector to a random point in the square encompassing ([-.5, .5], [-.5, .5])
     return vec3(random_double() - 0.5, random_double() - 0.5, 0);
 }
 
 // At a = 0 it is white, at a = 1.0 it is blue, blend in between.
-color camera::ray_color(const ray &r, int depth, const hittable &world) {
+color rt::camera::ray_color(const ray &r, int depth, const hittable &world) {
     // Don't gather any more light if max depth is exceeded
     if (depth <= 0)
         return color(0, 0, 0);
@@ -264,7 +266,7 @@ color camera::ray_color(const ray &r, int depth, const hittable &world) {
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
 }
 
-point3 camera::defocus_disk_sample() const {
+point3 rt::camera::defocus_disk_sample() const {
     // Return random point in camera defocus disk
     auto p = random_in_unit_disk();
     return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);

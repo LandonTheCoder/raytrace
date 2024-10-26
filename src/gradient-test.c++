@@ -117,13 +117,13 @@ int main(int argl, char **args) {
     // Handle arguments
     std::ostream &outstream = (pargs.fname != nullptr)? out_file : std::cout;
 
-    if (pargs.ftype == BMPOUT_PPM) {
+    if (pargs.ftype == BitmapOutput::PPM) {
         raw_bmp.write_as_ppm(outstream);
-    } else if (pargs.ftype == BMPOUT_BMP) {
+    } else if (pargs.ftype == BitmapOutput::BMP) {
         raw_bmp.write_as_bmp_btt(outstream);
-    } else if (pargs.ftype == BMPOUT_PNG) {
+    } else if (pargs.ftype == BitmapOutput::PNG) {
         raw_bmp.write_as_png(outstream);
-    } else if (pargs.ftype == BMPOUT_JPEG) {
+    } else if (pargs.ftype == BitmapOutput::JPEG) {
         raw_bmp.write_as_jpeg(outstream);
     }
 

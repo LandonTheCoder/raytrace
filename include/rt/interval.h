@@ -2,6 +2,7 @@
 // Pragma once must be at top or else this gets included multiple times.
 #include "utils.h"
 
+namespace rt {
 class interval {
   public:
     double min, max;
@@ -32,3 +33,5 @@ class interval {
     // Defined in interval.c++ so I can use incremental linking safely
     static const interval empty, universe;
 };
+
+}

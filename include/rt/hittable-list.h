@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+namespace rt {
+
 class hittable_list: public hittable {
   public:
     std::vector<std::shared_ptr<hittable>> objects;
@@ -16,3 +18,5 @@ class hittable_list: public hittable {
 
     bool hit(const ray &r, interval ray_t, hit_record &rec) const override;
 };
+
+}

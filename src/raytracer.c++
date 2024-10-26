@@ -159,15 +159,15 @@ int main(int argl, char **args) {
     // This is a trick to avoid writing the code twice for stdout and a file.
     std::ostream &outstream = (pargs.fname != nullptr)? out_file : std::cout;
 
-    if (pargs.ftype == BMPOUT_PPM) {
+    if (pargs.ftype == BitmapOutput::PPM) {
         raw_bmp.write_as_ppm(outstream);
-    } else if (pargs.ftype == BMPOUT_BMP) {
+    } else if (pargs.ftype == BitmapOutput::BMP) {
         // The officially preferred way to write BMP is bottom-to-top row order.
         raw_bmp.write_as_bmp_btt(outstream);
-    } else if (pargs.ftype == BMPOUT_PNG) {
+    } else if (pargs.ftype == BitmapOutput::PNG) {
         // I need to test if this works.
         raw_bmp.write_as_png(outstream);
-    } else if (pargs.ftype == BMPOUT_JPEG) {
+    } else if (pargs.ftype == BitmapOutput::JPEG) {
         raw_bmp.write_as_jpeg(outstream);
     }
 }

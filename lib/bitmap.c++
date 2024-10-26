@@ -44,23 +44,23 @@
 
 // Global functions
 
-bool bitmap::type_is_supported(BitmapOutputType filetype) {
+bool rt::bitmap::type_is_supported(BitmapOutput filetype) {
     switch (filetype) {
-      case BMPOUT_PPM:
+      case BitmapOutput::PPM:
         return true;
         break;
-      case BMPOUT_BMP:
+      case BitmapOutput::BMP:
         return true;
         break;
       // Insert optional types here. If supported, the code to return true is
       // included. Otherwise, it isn't (falling back to false).
 #ifdef ENABLE_PNG
-      case BMPOUT_PNG:
+      case BitmapOutput::PNG:
         return true;
         break;
 #endif
 #if defined ENABLE_LIBJPEG || defined ENABLE_TJPEG3
-      case BMPOUT_JPEG:
+      case BitmapOutput::JPEG:
         return true;
         break;
 #endif
@@ -79,7 +79,7 @@ static inline double linear_to_gamma(double linear_component) {
 
 // Private functions for internal usage.
 
-bool bitmap::check_pixel_address_validity(int row, int column) {
+bool rt::bitmap::check_pixel_address_validity(int row, int column) {
     if (row > image_height - 1) {
         std::clog << "Row index " << row << " is out of bounds.\n";
         return false;
@@ -95,7 +95,7 @@ bool bitmap::check_pixel_address_validity(int row, int column) {
 // Pixel writers.
 
 // Note: row and column index starting from 0.
-void bitmap::write_pixel_rgb(int row, int column, uint8_t r, uint8_t g, uint8_t b) {
+void rt::bitmap::write_pixel_rgb(int row, int column, uint8_t r, uint8_t g, uint8_t b) {
     if (!this->check_pixel_address_validity(row, column)) {
         return;
     }
@@ -112,7 +112,7 @@ void bitmap::write_pixel_rgb(int row, int column, uint8_t r, uint8_t g, uint8_t 
 }
 
 // Like write_pixel_rgb() but using a color vector instead.
-void bitmap::write_pixel_vec3(int row, int column, const color &px_color) {
+void rt::bitmap::write_pixel_vec3(int row, int column, const color &px_color) {
     if (!this->check_pixel_address_validity(row, column)) {
         return;
     }
@@ -143,21 +143,21 @@ void bitmap::write_pixel_vec3(int row, int column, const color &px_color) {
 
 // Bitmap writer/serialization functions
 
-void bitmap::write_to_file(std::ostream &out, BitmapOutputType filetype) {
+void rt::bitmap::write_to_file(std::ostream &out, BitmapOutput filetype) {
     // Note: I expect you have already checked to make sure you aren't trying
     // to use an unsupported writer.
     switch (filetype) {
-      case BMPOUT_PPM:
+      case BitmapOutput::PPM:
         write_as_ppm(out);
         break;
-      case BMPOUT_BMP:
-        // In case of issues, change to bitmap::write_as_bmp_ttb()
+      case BitmapOutput::BMP:
+        // In case of issues, change to rt::bitmap::write_as_bmp_ttb()
         write_as_bmp_btt(out);
         break;
-      case BMPOUT_PNG:
+      case BitmapOutput::PNG:
         write_as_png(out);
         break;
-      case BMPOUT_JPEG:
+      case BitmapOutput::JPEG:
         write_as_jpeg(out);
         break;
       default:
@@ -167,7 +167,7 @@ void bitmap::write_to_file(std::ostream &out, BitmapOutputType filetype) {
 }
 
 // Writes out bitmap as PPM data
-void bitmap::write_as_ppm(std::ostream &out) {
+void rt::bitmap::write_as_ppm(std::ostream &out) {
     // PPM header
     out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     // It should roll over into a new row when the index is a multiple of this.
@@ -187,7 +187,7 @@ void bitmap::write_as_ppm(std::ostream &out) {
 }
 
 // Writes out bitmap to BMP, written top-to-bottom order.
-void bitmap::write_as_bmp_ttb(std::ostream &out) {
+void rt::bitmap::write_as_bmp_ttb(std::ostream &out) {
     int new_row_multiple = image_width * 3;
     // To be used as padding with padding_size
     char padding[3] = {0, 0, 0};
@@ -229,7 +229,7 @@ void bitmap::write_as_bmp_ttb(std::ostream &out) {
 
 // Writes out bitmap to BMP, written bottom-to-top order.
 // This one is line-buffered, so it goes faster than the top-to-bottom writer.
-void bitmap::write_as_bmp_btt(std::ostream &out) {
+void rt::bitmap::write_as_bmp_btt(std::ostream &out) {
     int new_row_multiple = image_width * 3;
     // Determine how much padding is needed.
     int padding_size = new_row_multiple % 4;
@@ -305,7 +305,7 @@ static void png_flush_callback(png_structp png_ptr) {
 }
 
 // Writes out a PNG (support is optional)
-void bitmap::write_as_png(std::ostream &out) {
+void rt::bitmap::write_as_png(std::ostream &out) {
     // Implement the real thing here.
     // Determine which args are necessary.
     // With typedef void (*)(png_structp, png_const_charp) err_fn_t:
@@ -374,7 +374,7 @@ void bitmap::write_as_png(std::ostream &out) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
 #else
-void bitmap::write_as_png(std::ostream &out) {
+void rt::bitmap::write_as_png(std::ostream &out) {
     return;
 }
 #endif
@@ -384,7 +384,7 @@ void bitmap::write_as_png(std::ostream &out) {
 #include <turbojpeg.h>
 
 // Write out a JPEG (using TurboJPEG 3). Note that TurboJPEG is currently untested.
-void bitmap::write_as_jpeg(std::ostream &out) {
+void rt::bitmap::write_as_jpeg(std::ostream &out) {
     tjhandle j_handle = tj3Init(TJINIT_COMPRESS); // Returns handle or NULL if error
 
     if (!j_handle) {
@@ -437,7 +437,7 @@ void bitmap::write_as_jpeg(std::ostream &out) {
 #include <jerror.h>
 
 // Write out a JPEG (using libjpeg/libjpeg-turbo)
-void bitmap::write_as_jpeg(std::ostream &out) {
+void rt::bitmap::write_as_jpeg(std::ostream &out) {
     struct jpeg_compress_struct j_comp;
     struct jpeg_error_mgr jerr;
 
@@ -513,7 +513,7 @@ void bitmap::write_as_jpeg(std::ostream &out) {
     free(jpeg_buf);
 }
 #else
-void bitmap::write_as_jpeg(std::ostream &out) {
+void rt::bitmap::write_as_jpeg(std::ostream &out) {
     return;
 }
 #endif

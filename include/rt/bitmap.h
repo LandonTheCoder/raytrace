@@ -7,16 +7,17 @@
 // For std::unique_ptr<>
 #include <memory>
 
-// To allow querying supported types at runtime. BMPOUT_TERMINATOR is to
-// determine the end of a supported_type_list.
-enum BitmapOutputType { BMPOUT_TERMINATOR, BMPOUT_PPM, BMPOUT_BMP, BMPOUT_PNG, BMPOUT_JPEG };
-
+namespace rt {
 // Stores a simple RGB color in a convenient structure.
 struct rgb {
     uint8_t r;
     uint8_t g;
     uint8_t b;
 };
+
+// To allow querying supported types at runtime. May be queried like rt::BitmapOutput::PNG.
+// Note: This cannot be implicitly converted to an int, it must have explicit static_cast<int>().
+enum class BitmapOutput { PPM, BMP, PNG, JPEG };
 
 /* Class for a RGB24 bitmap (R8G8B8).
  * Includes functions to serialize as a few different formats.
@@ -30,6 +31,7 @@ struct rgb {
  */
 class bitmap {
   public:
+
     // Goes from left-to-right, top-to-bottom, in RGB order (8 bpc, 24bpp)
     std::unique_ptr<uint8_t[]> pixel_data;
 
@@ -79,10 +81,10 @@ class bitmap {
     void write_as_jpeg(std::ostream &out);
 
     // Write to file (selected based on type specified)
-    void write_to_file(std::ostream &out, BitmapOutputType filetype);
+    void write_to_file(std::ostream &out, BitmapOutput filetype);
 
     // Returns whether a type is supported.
-    static bool type_is_supported(BitmapOutputType filetype);
+    static bool type_is_supported(BitmapOutput filetype);
 
   private:
     // Internal and immutable data here.
@@ -95,3 +97,5 @@ class bitmap {
      */
     bool check_pixel_address_validity(int row, int column);
 };
+
+}

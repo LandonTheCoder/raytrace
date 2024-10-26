@@ -2,6 +2,7 @@
 
 #include "vec3.h"
 
+namespace rt {
 class ray {
   public:
     ray() {}
@@ -22,3 +23,5 @@ class ray {
     // Direction
     vec3 dir;
 };
+
+}

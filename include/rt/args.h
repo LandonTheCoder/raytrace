@@ -2,6 +2,10 @@
 
 namespace rt {
 // Used by the calling program
+
+// Defined later in bitmap.h, you need it anyway in main program.
+enum class BitmapOutput;
+
 struct args {
     /* Index of filename.
      * On Windows, the OS sometimes does lossy argument conversion from UTF-16
@@ -10,7 +14,7 @@ struct args {
      */
     int fname_pos;
     // Enum value of file type (Default: PPM for stdout, extension-determined for file)
-    int ftype;
+    BitmapOutput ftype;
     // File name (or nullptr if stdout)
     char *fname;
     // Amount of threads to use. Not all programs implement this.

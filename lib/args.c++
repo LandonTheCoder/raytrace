@@ -15,10 +15,13 @@
 // For struct args
 #include <rt/args.h>
 
+using rt::bitmap;
+using rt::BitmapOutput;
+
 // Prints help
 static void print_help(bool is_err, char *progname) {
-    bool png_supported = bitmap::type_is_supported(BMPOUT_PNG);
-    bool jpeg_supported = bitmap::type_is_supported(BMPOUT_JPEG);
+    bool png_supported = bitmap::type_is_supported(BitmapOutput::PNG);
+    bool jpeg_supported = bitmap::type_is_supported(BitmapOutput::JPEG);
     char help_str[] =
 "\npositional arguments:\n"
 "  FILE                  Specifies file to output to (defaults to stdout if\n"
@@ -145,7 +148,7 @@ struct rt::args rt::parse_args(int argl, char **args) {
     if (nproc == 0)
         nproc = 1;
     // Default argument values
-    struct args parsed_args = {.fname_pos = -1, .ftype = BMPOUT_PPM,
+    struct args parsed_args = {.fname_pos = -1, .ftype = BitmapOutput::PPM,
                                .fname = nullptr, .n_threads = nproc};
 
     if (argl == 1)
@@ -247,19 +250,19 @@ struct rt::args rt::parse_args(int argl, char **args) {
 
             if (!type_is_set_explicitly) {
                 if (sv.iends_with(".bmp"sv))
-                    parsed_args.ftype = BMPOUT_BMP;
+                    parsed_args.ftype = BitmapOutput::BMP;
                 else if (sv.iends_with(".ppm"sv))
-                    parsed_args.ftype = BMPOUT_PPM;
+                    parsed_args.ftype = BitmapOutput::PPM;
                 else if (sv.iends_with(".png"sv)) {
-                    parsed_args.ftype = BMPOUT_PNG;
-                    if (!bitmap::type_is_supported(BMPOUT_PNG)) {
+                    parsed_args.ftype = BitmapOutput::PNG;
+                    if (!bitmap::type_is_supported(BitmapOutput::PNG)) {
                         print_help(true, args[0]);
                         std::clog << "PNG support not built in.\n";
                         exit(4);
                     }
                 } else if (sv.iends_with(".jpg"sv)) {
-                    parsed_args.ftype = BMPOUT_JPEG;
-                    if (!bitmap::type_is_supported(BMPOUT_JPEG)) {
+                    parsed_args.ftype = BitmapOutput::JPEG;
+                    if (!bitmap::type_is_supported(BitmapOutput::JPEG)) {
                         print_help(true, args[0]);
                         std::clog << "JPEG support not built in.\n";
                         exit(4);
@@ -276,19 +279,19 @@ struct rt::args rt::parse_args(int argl, char **args) {
             // Set (explicit) file type
             std::clog << "Setting file type explicitly\n";
             if (type_name == "bmp"sv)
-                parsed_args.ftype = BMPOUT_BMP;
+                parsed_args.ftype = BitmapOutput::BMP;
             else if (type_name == "ppm"sv)
-                parsed_args.ftype = BMPOUT_PPM;
+                parsed_args.ftype = BitmapOutput::PPM;
             else if (type_name == "png"sv) {
-                parsed_args.ftype = BMPOUT_PNG;
-                if (!bitmap::type_is_supported(BMPOUT_PNG)) {
+                parsed_args.ftype = BitmapOutput::PNG;
+                if (!bitmap::type_is_supported(BitmapOutput::PNG)) {
                     print_help(true, args[0]);
                     std::clog << "PNG support not built in.\n";
                     exit(4);
                 }
             } else if (type_name == "jpg"sv) {
-                parsed_args.ftype = BMPOUT_JPEG;
-                if (!bitmap::type_is_supported(BMPOUT_JPEG)) {
+                parsed_args.ftype = BitmapOutput::JPEG;
+                if (!bitmap::type_is_supported(BitmapOutput::JPEG)) {
                     print_help(true, args[0]);
                     std::clog << "JPEG support not built in.\n";
                     exit(4);
@@ -336,9 +339,9 @@ int main(int argl, char **args) {
         fname = pargs.fname;
 
     const char *ftype = "???";
-    if (pargs.ftype == BMPOUT_PPM)
+    if (pargs.ftype == BitmapOutput::PPM)
         ftype = "ppm";
-    else if (pargs.ftype == BMPOUT_BMP)
+    else if (pargs.ftype == BitmapOutput::BMP)
         ftype = "bmp";
 
     std::cout << "fname is " << fname <<

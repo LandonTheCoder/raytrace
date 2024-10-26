@@ -4,6 +4,8 @@
 // For std::shared_ptr
 #include <memory>
 
+namespace rt {
+
 class sphere: public hittable {
   public:
     sphere(const point3 &center, double radius, std::shared_ptr<material> mat):
@@ -16,3 +18,5 @@ class sphere: public hittable {
     double radius;
     std::shared_ptr<material> mat; // To be initialized
 };
+
+}

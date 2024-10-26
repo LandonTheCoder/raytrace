@@ -15,7 +15,7 @@
 #include <cstring>
 
 // Determine what formats are supported.
-#include "config.h"
+#include "rt-lib-config.h"
 
 /* I need to emulate VLAs on compilers lacking the extension to support it.
  * Note that VLAs are standard in C (optionally in C11+), but not C++.

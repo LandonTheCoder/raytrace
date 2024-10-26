@@ -41,11 +41,12 @@ if not jpeg_dep.found()
 endif
 
 conf_data.set('ENABLE_PNG', png_dep.found(), description: 'Enable libpng support')
-configure_file(output: 'config.h', configuration: conf_data)
+# I generate config file for internal use in lib subdir
 
 deps = [png_dep, jpeg_dep]
 
 # Files linked in which are OS-specific
+# Note: I can make them subdir-independent by using files()
 os_inputs = []
 
 # OS-specific stuff
@@ -62,34 +63,24 @@ if host_machine.system() == 'windows'
     endif
 endif
 
-# The files implementing the raytracer internals
-rt_main_files = ['lib/args.c++',
-                 'lib/bitmap.c++',
-                 'lib/camera.c++',
-                 'lib/hittable-list.c++',
-                 'lib/interval.c++',
-                 'lib/material.c++',
-                 'lib/quirks.c++',
-                 'lib/sphere.c++']
-
-# Only used internally in library portion
-internal_include = include_directories('lib/internal')
 # Exposed externally
 sys_include = include_directories('include')
 
-# I don't need most of this stuff for ppm-example, just link the necessary ones.
+subdir('lib')
+
+# Note: This will create files as builddir/src/*
+#subdir('src')
+
+# Build demonstration executables
 executable('gradient-test',
            'src/gradient-test.c++',
-           'lib/args.c++',
-           'lib/bitmap.c++',
-           'lib/quirks.c++',
            os_inputs,
-           include_directories: [internal_include, sys_include],
-           dependencies: deps,
+           include_directories: [sys_include],
+           link_with: rtlib,
            install: true)
 executable('raytracer',
            'src/raytracer.c++',
-           rt_main_files, os_inputs,
-           include_directories: [internal_include, sys_include],
-           dependencies: deps,
+           os_inputs,
+           include_directories: [sys_include],
+           link_with: rtlib,
            install: true)

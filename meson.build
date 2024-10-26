@@ -1,4 +1,4 @@
-project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.6',
+project('raytrace', 'c', 'cpp', license: 'MIT', version: '1.3.7',
         meson_version: '>= 0.59.0',
         default_options: ['cpp_std=c++20', 'default_library=static'])
 # I put the default options up there because it doesn't seem to work otherwise.
@@ -63,24 +63,33 @@ if host_machine.system() == 'windows'
 endif
 
 # The files implementing the raytracer internals
-rt_main_files = ['args.c++',
-                 'bitmap.c++',
-                 'camera.c++',
-                 'hittable-list.c++',
-                 'interval.c++',
-                 'material.c++',
-                 'quirks.c++',
-                 'sphere.c++']
+rt_main_files = ['lib/args.c++',
+                 'lib/bitmap.c++',
+                 'lib/camera.c++',
+                 'lib/hittable-list.c++',
+                 'lib/interval.c++',
+                 'lib/material.c++',
+                 'lib/quirks.c++',
+                 'lib/sphere.c++']
+
+# Only used internally in library portion
+internal_include = include_directories('lib/internal')
+# Exposed externally
+sys_include = include_directories('include')
 
 # I don't need most of this stuff for ppm-example, just link the necessary ones.
 executable('gradient-test',
-           'gradient-test.c++',
-           'args.c++',
-           'bitmap.c++',
-           'quirks.c++',
+           'src/gradient-test.c++',
+           'lib/args.c++',
+           'lib/bitmap.c++',
+           'lib/quirks.c++',
            os_inputs,
-           dependencies: deps, install: true)
+           include_directories: [internal_include, sys_include],
+           dependencies: deps,
+           install: true)
 executable('raytracer',
-           'raytracer.c++',
+           'src/raytracer.c++',
            rt_main_files, os_inputs,
-           dependencies: deps, install: true)
+           include_directories: [internal_include, sys_include],
+           dependencies: deps,
+           install: true)

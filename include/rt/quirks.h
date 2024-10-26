@@ -2,11 +2,11 @@
 // This contains functions to work around OS quirks like Windows not having
 // ANSI escapes by default, or "\n" -> "\r\n" replacement on stdout.
 
-#ifdef __cplusplus
 // For std::clog
 #include <iostream>
 
-extern "C" {
+namespace rt {
+
 // This specifies another file holds the actual pointer symbol.
 // This allows the main program to define it and the library to hold it.
 // Line printer function for usage in other functions
@@ -22,8 +22,6 @@ void print_lines_remaining_ansi(int lines_remaining);
 void print_lines_remaining_plain(int lines_remaining);
 void print_done_ansi(void);
 void print_done_plain(void);
-
-#endif
 
 /* Sets locale correctly. This ensures a locale other than the "C" locale,
  * and on Windows ensures UTF-8 locale if possible.
@@ -55,6 +53,4 @@ void fix_stdout(void);
  */
 char * reconv_cli_arg(int arg_pos, int argl, char *arg);
 
-#ifdef __cplusplus
 }
-#endif

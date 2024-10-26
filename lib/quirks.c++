@@ -10,30 +10,30 @@
 
 // OS-agnostic definitions
 // Line printer function for usage in other functions
-void (*line_printer)(int);
+void (*rt::line_printer)(int);
 // Prints "Done."
-void (*done_printer)();
+void (*rt::done_printer)();
 
 // Print lines remaining (ANSI-escape version, hopefully faster on Windows)
-void print_lines_remaining_ansi(int lines_remaining) {
+void rt::print_lines_remaining_ansi(int lines_remaining) {
     // "\e[1G" moves to start of line, "\e[2K" clears from cursor to end of line.
     std::clog << "\033[22G\033[0K" << lines_remaining << std::flush;
 }
 
 // Print lines remaining (non-ANSI-terminal version)
 // This runs *really* slowly on Windows compared to gnome-terminal.
-void print_lines_remaining_plain(int lines_remaining) {
+void rt::print_lines_remaining_plain(int lines_remaining) {
     std::clog << "\rScanlines remaining: "
               << lines_remaining << ' ' << std::flush;
 }
 
 // Print "Done." (ANSI-escape version)
-void print_done_ansi(void) {
+void rt::print_done_ansi(void) {
     std::clog << "\r\033[0KDone.\n";
 }
 
 // Print "Done." (non-ANSI fallback)
-void print_done_plain(void) {
+void rt::print_done_plain(void) {
     // Fallback when ANSI escapes are unavailable.
     std::clog << "\rDone.                 \n";
 }
@@ -58,6 +58,8 @@ int wcargl = -1; // Holds length of wcargs (UTF-16 arguments)
 // Holds cached reconverted args to save memory
 char **conv_args = nullptr;
 int conv_argl = -1;
+
+using namespace rt;
 
 // Utility functions
 
@@ -128,7 +130,7 @@ static void init_wcargs(void) {
 // Exported functions
 
 // Returns 0 if fully successful (UTF-8 codepage), real codepage otherwise
-int ensure_locale(void) {
+int rt::ensure_locale(void) {
     /* Determine whether UTF-8 codepage is supported. I have to explicitly opt
      * into the UTF-8 codepage, which doesn't work on builds before 1903 or so.
      * If not supported (or broken), it falls back to the legacy codepage, and
@@ -153,7 +155,7 @@ int ensure_locale(void) {
 
 // Obviously, just return 0 if running on Unix-like OS. Use ifdefs for that.
 // Return -1 if unsupported, 0 if good or no-op, error value if something else.
-int enable_vt_escapes(void) {
+int rt::enable_vt_escapes(void) {
     // I log to stderr
     HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
     if (out == INVALID_HANDLE_VALUE) {
@@ -185,13 +187,13 @@ int enable_vt_escapes(void) {
 }
 
 // Fix stdout to be binary so it doesn't corrupt binary files
-void fix_stdout(void) {
+void rt::fix_stdout(void) {
     _setmode(_fileno(stdout), _O_BINARY);
 }
 
 // Retrieve reconverted CLI argument (which should be Unicode-clean)
 // May return NULL (eventually crashing program) if conversion fails.
-char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
+char * rt::reconv_cli_arg(int arg_pos, int argl, char *arg) {
     char *retarg;
     if (wcargs == nullptr) {
         init_wcargs();
@@ -249,19 +251,19 @@ char * reconv_cli_arg(int arg_pos, int argl, char *arg) {
 
 #else
 // We should be on a Unix-like system here, so these can be no-ops.
-int ensure_locale(void) {
+int rt::ensure_locale(void) {
     // UTF-8 locale is assumed on Unix-like systems
     setlocale(LC_ALL, "");
     return 0;
 }
 
-int enable_vt_escapes(void) {
+int rt::enable_vt_escapes(void) {
     return 0;
 }
-void fix_stdout(void) {
+void rt::fix_stdout(void) {
     return;
 }
-char * reconv_cli_arg(int arg_pos, int argl, char *fname) {
+char * rt::reconv_cli_arg(int arg_pos, int argl, char *fname) {
     return fname; // No conversion needed
 }
 #endif // defined(_WIN32)

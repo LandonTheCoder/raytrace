@@ -139,7 +139,7 @@ class StringView: public std::string_view {
     }
 };
 
-struct args parse_args(int argl, char **args) {
+struct rt::args rt::parse_args(int argl, char **args) {
     // Check number of threads. If unassessable, it returns 0, which is changed to 1.
     int nproc = std::thread::hardware_concurrency();
     if (nproc == 0)

@@ -35,7 +35,7 @@ void camera::render_mt_impl(const hittable &world, bitmap &raw_bmp, int line_beg
 
         lines_remaining--;
         // Apparently writes to std::clog are thread-safe.
-        line_printer(lines_remaining);
+        rt::line_printer(lines_remaining);
     }
 }
 
@@ -45,10 +45,10 @@ bitmap camera::render(const hittable &world, int n_threads) {
         throw std::invalid_argument("The number of threads must be 0 or greater!");
 
     // Program crashes if either is NULL
-    assert(line_printer != nullptr);
-    assert(done_printer != nullptr);
+    assert(rt::line_printer != nullptr);
+    assert(rt::done_printer != nullptr);
 
-    int vt_escape_status = enable_vt_escapes();
+    int vt_escape_status = rt::enable_vt_escapes();
 
     // Note: render_mutex is a recursive mutex because it will also be locked from
     // the single-threaded renderer if we decide to call it.
@@ -100,7 +100,7 @@ bitmap camera::render(const hittable &world, int n_threads) {
     auto end_idx = block_size;
 
     lines_remaining = image_height;
-    print_first_lines_remaining(lines_remaining);
+    rt::print_first_lines_remaining(lines_remaining);
 
     for (int tid = 0; tid < n_threads; tid++) {
         // The remainder is given to the last thread.
@@ -124,18 +124,18 @@ bitmap camera::render(const hittable &world, int n_threads) {
     // I wonder if this is breaking things somehow. Try commenting it out?
     lines_remaining = -1;
 
-    done_printer();
+    rt::done_printer();
 
     return raw_bmp;
 }
 
 bitmap camera::render(const hittable &world) {
     // Returns 0 if success/no-op, -1 if unavailable, positive error otherwise
-    int vt_escape_status = enable_vt_escapes();
+    int vt_escape_status = rt::enable_vt_escapes();
 
     // Program crashes if either is null
-    assert(line_printer != nullptr);
-    assert(done_printer != nullptr);
+    assert(rt::line_printer != nullptr);
+    assert(rt::done_printer != nullptr);
 
     // I have to make sure it isn't trying to run 2 jobs at once (data race!)
     // This may be locked twice within the same thread if called from the MT renderer method.
@@ -156,9 +156,12 @@ bitmap camera::render(const hittable &world) {
     // Fill in with code from main()
     auto raw_bmp = bitmap(image_width, image_height);
 
+    // Needed here or line counter may not print right
+    rt::print_first_lines_remaining(image_height);
+
     // Go through image from left-to-right, top-to-bottom.
     for (int j = 0; j < image_height; j++) {
-        line_printer(image_height - j);
+        rt::line_printer(image_height - j);
         for (int i = 0; i < image_width; i++) {
             color pixel_color(0, 0, 0);
             for (int sample = 0; sample < samples_per_pixel; sample++) {
@@ -170,7 +173,7 @@ bitmap camera::render(const hittable &world) {
         }
     }
 
-    done_printer();
+    rt::done_printer();
 
     return raw_bmp;
 }

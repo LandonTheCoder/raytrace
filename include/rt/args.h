@@ -1,3 +1,6 @@
+#pragma once
+
+namespace rt {
 // Used by the calling program
 struct args {
     /* Index of filename.
@@ -16,3 +19,5 @@ struct args {
 
 // Parses args into a format that can more easily be used.
 struct args parse_args(int argl, char **args);
+
+}

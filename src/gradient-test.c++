@@ -15,6 +15,8 @@
 // For std::filesystem::path (used in signal handler)
 #include <filesystem>
 
+using namespace rt;
+
 // Converts to RGB in linear space (unlike the bitmap method)
 struct rgb color_vec3_to_rgb(const color &pixel_color) {
     auto r = pixel_color.x();

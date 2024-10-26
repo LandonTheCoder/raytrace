@@ -25,6 +25,8 @@
 // For std::filesystem::path (to handle deleting it)
 #include <filesystem>
 
+using namespace rt;
+
 static std::filesystem::path fpath;
 static std::ofstream out_file;
 

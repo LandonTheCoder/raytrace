@@ -197,6 +197,7 @@ void rt::bitmap::write_as_bmp_ttb(std::ostream &out) {
 
     int bmp_pxtable_size = filled_row_size * image_height;
     int bmp_file_size = bmp_pxtable_size + sizeof(struct bmp_header);
+    // FIXME: This assumes little-endian.
     struct bmp_header hdr = {.type = 0x4d42, .bmp_size = bmp_file_size,
                              .reserved_1 = 0, .reserved_2 = 0,
                              .pixel_offset = 0x36, // Size of header
@@ -216,10 +217,11 @@ void rt::bitmap::write_as_bmp_ttb(std::ostream &out) {
     out.write(reinterpret_cast<char *>(&hdr), sizeof(hdr));
     for (int index = 0; index < raw_size; index += 3) {
         // Reverse order of pixel colors.
-        // (Fix compiler warning about unsigned-signed cast.)
         uint8_t pxbuf[3] = {pixel_data[index + 2],
                             pixel_data[index + 1],
                             pixel_data[index]};
+        // The cast here is because std::ostream::write() only accepts char *,
+        // and it avoid a compiler warning.
         out.write(reinterpret_cast<char *>(pxbuf), 3);
         if (index > 0 && index % new_row_multiple == 0) {
             out.write(padding, padding_size);
@@ -238,7 +240,7 @@ void rt::bitmap::write_as_bmp_btt(std::ostream &out) {
 
     int bmp_pxtable_size = filled_row_size * image_height;
     int bmp_file_size = bmp_pxtable_size + sizeof(struct bmp_header);
-    // Note: This assumes little-endian, fix later.
+    // FIXME: This assumes little-endian. I don't want to implement it yet.
     struct bmp_header hdr = {.type = 0x4d42, .bmp_size = bmp_file_size,
                              .reserved_1 = 0, .reserved_2 = 0,
                              .pixel_offset = 0x36, // Size of header

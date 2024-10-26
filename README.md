@@ -8,6 +8,11 @@ The basic gist of what I'm doing is:
 
 This is based on the Ray Tracing in One Weekend tutorial, with a few modifications added for flexibility (such as modifying it so that it can output to formats other than PPM, with room for expansion).
 
+## Code organization ##
+The code is organized into a few directories: the include/ directory is public headers (following the same pattern as would be for the public directory), the lib/ directory contains code implementing the raytracing library, and the src/ directory contains example programs for demonstration. The lib/internal/ subdirectory contains headers used internally by the library portion (which aren't exposed as public API). The subprojects/ directory contains meson wrap files to allow building optional features more easily on Windows.
+
+Example programs are built in the main meson.build, and the headers and library are handled as subdirectories.
+
 ## Build Options ##
 I have 3 options: the "png" feature, which enables/disables libpng support (to enable writing PNG files), the "jpeg" feature, which enables/disables libjpeg/libjpeg-turbo support (which enables writing JPEG files), and the "turbojpeg" feature, which selects which JPEG implementation to use (preferring TurboJPEG 3 but falling back to libjpeg by default if it isn't available). I will use options to allow picking optional features (like image-format support).
 

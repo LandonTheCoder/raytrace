@@ -31,7 +31,6 @@ enum class BitmapOutput { PPM, BMP, PNG, JPEG };
  */
 class bitmap {
   public:
-
     // Goes from left-to-right, top-to-bottom, in RGB order (8 bpc, 24bpp)
     std::unique_ptr<uint8_t[]> pixel_data;
 

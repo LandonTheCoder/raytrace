@@ -3,6 +3,7 @@
 #include "utils.h"
 
 namespace rt {
+
 class interval {
   public:
     double min, max;

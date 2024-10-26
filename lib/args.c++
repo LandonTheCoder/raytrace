@@ -9,7 +9,7 @@
 // For std::from_chars()
 #include <charconv>
 
-// For BMPOUT_*
+// For BitmapOutput
 #include <rt/bitmap.h>
 
 // For struct args

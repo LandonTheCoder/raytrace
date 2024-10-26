@@ -3,6 +3,7 @@
 #include "vec3.h"
 
 namespace rt {
+
 class ray {
   public:
     ray() {}

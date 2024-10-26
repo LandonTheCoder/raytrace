@@ -1,14 +1,14 @@
-#include "camera.h"
+#include <rt/camera.h>
 #include <iostream>
 // For bitmap class
-#include "bitmap.h"
+#include <rt/bitmap.h>
 // For random_double()
-#include "utils.h"
+#include <rt/utils.h>
 // For material to scatter
-#include "material.h"
+#include <rt/material.h>
 
 // For OS-specific workarounds/quirks
-#include "quirks.h"
+#include <rt/quirks.h>
 // assert() to notify if line_printer or done_printer are null
 #include <cassert>
 

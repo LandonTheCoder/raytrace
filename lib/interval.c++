@@ -1,4 +1,4 @@
-#include "interval.h"
+#include <rt/interval.h>
 
 // Defined in a separate source file to avoid linker clashes
 const interval interval::empty = interval(+infinity, -infinity);

@@ -1,21 +1,21 @@
-#include "rtweekend.h"
+#include <rt/rtweekend.h>
 
 // Camera is responsible for doing a render, given the set parameters.
-#include "camera.h"
+#include <rt/camera.h>
 // hit_record and hittable abstract base class
-#include "hittable.h"
+#include <rt/hittable.h>
 // List of hittable objects.
-#include "hittable-list.h"
+#include <rt/hittable-list.h>
 // Includes the types of material
-#include "material.h"
+#include <rt/material.h>
 // The sphere (which is currently the only hittable)
-#include "sphere.h"
+#include <rt/sphere.h>
 // For bitmap class
-#include "bitmap.h"
+#include <rt/bitmap.h>
 // For struct args and argument parser.
-#include "args.h"
+#include <rt/args.h>
 // OS-specific workarounds/quirks
-#include "quirks.h"
+#include <rt/quirks.h>
 
 #include <iostream>
 // For std::ofstream

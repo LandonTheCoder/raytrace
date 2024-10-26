@@ -1,11 +1,11 @@
-#include "color.h"
-#include "bitmap.h"
-#include "vec3.h"
-#include "interval.h"
+#include <rt/color.h>
+#include <rt/bitmap.h>
+#include <rt/vec3.h>
+#include <rt/interval.h>
 // For struct args, parse_args()
-#include "args.h"
+#include <rt/args.h>
 // For testing workarounds/quirks, line counter
-#include "quirks.h"
+#include <rt/quirks.h>
 
 #include <iostream>
 // For std::ofstream

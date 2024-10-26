@@ -1,5 +1,5 @@
-#include "vec3.h"
-#include "bitmap.h"
+#include <rt/vec3.h>
+#include <rt/bitmap.h>
 // For .bmp writer functions
 #include "bmp-format.h"
 // uint8_t
@@ -8,7 +8,7 @@
 // In case I want to printf()
 #include <cstdio>
 // For interval.clamp()
-#include "interval.h"
+#include <rt/interval.h>
 // For std::sqrt()
 #include <cmath>
 // For memset()

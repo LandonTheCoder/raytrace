@@ -10,10 +10,10 @@
 #include <charconv>
 
 // For BMPOUT_*
-#include "bitmap.h"
+#include <rt/bitmap.h>
 
 // For struct args
-#include "args.h"
+#include <rt/args.h>
 
 // Prints help
 static void print_help(bool is_err, char *progname) {

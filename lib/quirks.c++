@@ -1,5 +1,5 @@
 // This contains per-OS functions to handle quirks.
-#include "quirks.h"
+#include <rt/quirks.h>
 
 // OS-agnostic includes
 // For setlocale()

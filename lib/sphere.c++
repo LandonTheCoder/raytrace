@@ -1,4 +1,4 @@
-#include "sphere.h"
+#include <rt/sphere.h>
 
 // The override keyword is only shown in the class definition (in header)
 bool sphere::hit(const ray &r, interval ray_t, hit_record &rec) const {

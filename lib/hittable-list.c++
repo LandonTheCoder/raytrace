@@ -1,4 +1,4 @@
-#include "hittable-list.h"
+#include <rt/hittable-list.h>
 
 using std::make_shared;
 using std::shared_ptr;

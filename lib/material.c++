@@ -1,4 +1,4 @@
-#include "material.h"
+#include <rt/material.h>
 
 // Lambertian scatter
 bool lambertian::scatter(const ray &r_in, const hit_record &rec,

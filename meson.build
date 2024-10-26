@@ -1,5 +1,5 @@
 project('raytrace', 'c', 'cpp', license: 'MIT', version: '2.0',
-        meson_version: '>= 0.59.0',
+        meson_version: '>= 0.63.0',
         default_options: ['cpp_std=c++20', 'default_library=static'])
 # I put the default options up there because it doesn't seem to work otherwise.
 # I want to avoid DLLs because it makes it annoying to work with on Windows
@@ -63,9 +63,7 @@ if host_machine.system() == 'windows'
     endif
 endif
 
-# Exposed externally
-sys_include = include_directories('include')
-
+subdir('include')
 subdir('lib')
 
 # Note: This will create files as builddir/src/*

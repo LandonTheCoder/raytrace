@@ -263,7 +263,8 @@ int rt::enable_vt_escapes(void) {
 void rt::fix_stdout(void) {
     return;
 }
-char * rt::reconv_cli_arg(int arg_pos, int argl, char *fname) {
+char * rt::reconv_cli_arg([[maybe_unused]] int arg_pos,
+                          [[maybe_unused]] int argl, char *fname) {
     return fname; // No conversion needed
 }
 #endif // defined(_WIN32)

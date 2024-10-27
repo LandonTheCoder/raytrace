@@ -5,7 +5,8 @@ using rt::hit_record;
 using rt::color;
 
 // Lambertian scatter
-bool rt::lambertian::scatter(const ray &r_in, const hit_record &rec,
+bool rt::lambertian::scatter([[maybe_unused]] const ray &r_in,
+                             const hit_record &rec,
                              color &attenuation, ray &scattered) const {
     /* We can either always scatter and attenuate according to reflectance,
      * or we can sometimes scatter P(1-R) with no attenuation, or a mix of both.

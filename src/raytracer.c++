@@ -81,7 +81,10 @@ int main(int argl, char **args) {
             // Note: This is because it seems I *have* to close before deleting on Windows.
             out_file.close();
             std::filesystem::remove(fpath);
-            std::exit(0);
+            if (signum == SIGINT)
+                std::exit(0);
+            else
+                std::exit(signum + 128); // The Unix signal behavior
         });
     }
 

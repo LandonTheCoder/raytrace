@@ -33,6 +33,12 @@
 #ifdef __GNUC__
 // To note a compiler (independent of vendor) which allows VLAs
 #define HAVE_VLA
+/* When compiling under -Wpedantic with GCC/Clang, it warns on nonstandard
+ * extensions. We can use this to acknowledge that usage and allow it
+ * anyway without complaining. I may use this to catch nonstandard extensions,
+ * as MSVC doesn't accept many of them (and I want it to build there).
+ */
+#define CC_EXT __extension__
 #else
 // GNU C extensions not supported (which includes VLAs in C++)
 // This means VLA emulation is required.
@@ -271,7 +277,7 @@ void rt::bitmap::write_as_bmp_btt(std::ostream &out) {
 
     // This stores the buffered row.
 #ifdef HAVE_VLA
-    uint8_t row_buf[filled_row_size];
+    CC_EXT uint8_t row_buf[filled_row_size];
 #else
     uint8_t *row_buf = STACK_VLARRAY(uint8_t, filled_row_size);
 #endif
@@ -365,7 +371,7 @@ void rt::bitmap::write_as_png(std::ostream &out) {
     png_write_info(png_ptr, info_ptr);
     // It takes different "row pointers". png_bytep is unsigned char *
 #ifdef HAVE_VLA
-    png_bytep row_pointers[image_height];
+    CC_EXT png_bytep row_pointers[image_height];
 #else
     // Fallback based on alloca().
     png_bytepp row_pointers = STACK_VLARRAY(png_bytep, image_height);
@@ -454,7 +460,7 @@ void rt::bitmap::write_as_jpeg(std::ostream &out) {
     uint8_t *jpeg_buf = nullptr;
     unsigned long jpeg_buf_size = 0;
 #ifdef HAVE_VLA
-    JSAMPROW row_pointers[image_height];
+    CC_EXT JSAMPROW row_pointers[image_height];
 #else
     // I prefer the VLA form because it is more readable, and better tested.
     JSAMPARRAY row_pointers = STACK_VLARRAY(JSAMPROW, image_height);

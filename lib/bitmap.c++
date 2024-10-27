@@ -536,16 +536,20 @@ void rt::bitmap::write_as_jpeg(std::ostream &out) {
 #endif
 
 #ifdef ENABLE_WEBP
+// The only thing I need (and it exposes a simple API for my use case!)
 #include <webp/encode.h>
+
 void rt::bitmap::write_as_webp(std::ostream &out) {
     uint8_t *webp_buf = nullptr;
     size_t webp_buf_size = 0;
 
     // size_t WebPEncodeLosslessRGB(const uint8_t *rgb, int width, int height,
     //                              int stride, uint8_t **output);
-    // compressed_image must be freed be WebPFree()
-    webp_buf_size = WebPEncodeLosslessRGB(pixel_data.get(), image_width, image_height,
-                                          3 * image_width, &webp_buf);
+    // webp_buf must be freed be WebPFree(), stride is the number of bytes
+    // between the start of each row.
+    webp_buf_size = WebPEncodeLosslessRGB(pixel_data.get(), image_width,
+                                          image_height, 3 * image_width,
+                                          &webp_buf);
 
     if (webp_buf_size == 0) {
         std::clog << "Failed to compress WebP lossless image!\n";
@@ -557,7 +561,7 @@ void rt::bitmap::write_as_webp(std::ostream &out) {
 
     out.write(reinterpret_cast<char *>(webp_buf), webp_buf_size);
 
-    // I have to free webp_buf myself through its function.
+    // I have to free webp_buf myself through libwebp's function.
     WebPFree(webp_buf);
     webp_buf = nullptr;
 }

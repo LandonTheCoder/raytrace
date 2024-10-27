@@ -262,11 +262,10 @@ void rt::bitmap::write_as_bmp_btt(std::ostream &out) {
     int top_row = new_row_multiple * (image_height - 1);
 
     // This stores the buffered row.
-    int row_buf_size = filled_row_size + padding_size;
 #ifdef HAVE_VLA
-    uint8_t row_buf[row_buf_size];
+    uint8_t row_buf[filled_row_size];
 #else
-    uint8_t *row_buf = STACK_VLARRAY(uint8_t, row_buf_size);
+    uint8_t *row_buf = STACK_VLARRAY(uint8_t, filled_row_size);
 #endif
 
     // Note: row_index >= 0 is correct, it makes it write the top line.
@@ -282,7 +281,7 @@ void rt::bitmap::write_as_bmp_btt(std::ostream &out) {
 
         }
         // Write the row.
-        out.write(reinterpret_cast<char *>(row_buf), row_buf_size);
+        out.write(reinterpret_cast<char *>(row_buf), filled_row_size);
     }
 }
 

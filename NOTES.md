@@ -79,7 +79,8 @@ std::vector\<T\> stores a collection of a specified type in a list that grows au
  - Implement more image formats:
    - Implement WebP lossless (see [libwebp](https://chromium.googlesource.com/webm/libwebp/+/HEAD/doc/api.md))
      - It does have a wrapfile, but I will want to disable the cwebp, dwebp, webpinfo, webpmux program features. I need to enable libwebp (and by extension libsharpyuv). I shouldn't need libwebpdemux or libwebpdecoder (I'm only compressing), and I don't *think* I need libwebpmux. I should enable simd and threads.
-   - Implement AVIF as a lossy option that goes smaller (Note: libavif is not 1.0 yet! That may be reason to hold off on it.) See [libavif on GitHub](https://github.com/AOMediaCodec/libavif).
+   - Implement AVIF as a lossy option that goes smaller (Note: My distro doesn't have libavif 1.0.) See [libavif on GitHub](https://github.com/AOMediaCodec/libavif).
+     - To implement it, use [avif_example_encode.c](https://github.com/AOMediaCodec/libavif/blob/main/examples/avif_example_encode.c) and [avif.h](https://github.com/AOMediaCodec/libavif/blob/main/include/avif/avif.h) as references.
      - Meson does *not* have a wrap file for libavif, so I have to self-build if I support it on Windows.
      - To build libavif, you have to select the codec to build. For encoding, I can use libaom (`AVIF_CODEC_AOM`), librav1e (`AVIF_CODEC_RAV1E`), or SVT-AV1 (`AVIF_CODEC_SVT`). Rav1e is performance-optimized, but it has rustc/cargo as a build dependency. The libaom reference implementation requires perl and nasm to build. SVT-AV1 requires a C99 compiler, CMake, and nasm (seems to have the least build deps for Windows builds). It may be easier to figure out a way to have a prebuilt DLL, though.
  - Refactor the code to be more library-like, move some redundancies out, etc.

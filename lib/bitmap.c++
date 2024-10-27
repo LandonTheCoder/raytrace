@@ -64,6 +64,11 @@ bool rt::bitmap::type_is_supported(BitmapOutput filetype) {
         return true;
         break;
 #endif
+#ifdef ENABLE_WEBP
+      case BitmapOutput::WebP:
+        return true;
+        break;
+#endif
       default:
         return false;
         break;
@@ -159,6 +164,9 @@ void rt::bitmap::write_to_file(std::ostream &out, BitmapOutput filetype) {
         break;
       case BitmapOutput::JPEG:
         write_as_jpeg(out);
+        break;
+      case BitmapOutput::WebP:
+        write_as_webp(out);
         break;
       default:
         std::clog << "Unsupported file type!\n";
@@ -376,6 +384,7 @@ void rt::bitmap::write_as_png(std::ostream &out) {
 }
 #else
 void rt::bitmap::write_as_png(std::ostream &out) {
+    std::clog << "Warning: PNG write support not built in, ignoring write attempt...\n";
     return;
 }
 #endif
@@ -515,6 +524,41 @@ void rt::bitmap::write_as_jpeg(std::ostream &out) {
 }
 #else
 void rt::bitmap::write_as_jpeg(std::ostream &out) {
+    std::clog << "Warning: JPEG write support not built in, ignoring write attempt...\n";
+    return;
+}
+#endif
+
+#ifdef ENABLE_WEBP
+#include <webp/encode.h>
+void rt::bitmap::write_as_webp(std::ostream &out) {
+    uint8_t *webp_buf = nullptr;
+    size_t webp_buf_size = 0;
+
+    // size_t WebPEncodeLosslessRGB(const uint8_t *rgb, int width, int height,
+    //                              int stride, uint8_t **output);
+    // compressed_image must be freed be WebPFree()
+    webp_buf_size = WebPEncodeLosslessRGB(pixel_data.get(), image_width, image_height,
+                                          3 * image_width, &webp_buf);
+
+    if (webp_buf_size == 0) {
+        std::clog << "Failed to compress WebP lossless image!\n";
+        return;
+    } else if (webp_buf == nullptr) {
+        std::clog << "WebP Encoder returned NULL pointer, bailing out!\n";
+        return;
+    }
+
+    out.write(reinterpret_cast<char *>(webp_buf), webp_buf_size);
+
+    // I have to free webp_buf myself through its function.
+    WebPFree(webp_buf);
+    webp_buf = nullptr;
+}
+
+#else
+void rt::bitmap::write_as_webp(std::ostream &out) {
+    std::clog << "Warning: WebP write support not built in, ignoring write attempt...\n";
     return;
 }
 #endif

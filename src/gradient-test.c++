@@ -120,15 +120,8 @@ int main(int argl, char **args) {
     // Handle arguments
     std::ostream &outstream = (pargs.fname != nullptr)? out_file : std::cout;
 
-    if (pargs.ftype == BitmapOutput::PPM) {
-        raw_bmp.write_as_ppm(outstream);
-    } else if (pargs.ftype == BitmapOutput::BMP) {
-        raw_bmp.write_as_bmp_btt(outstream);
-    } else if (pargs.ftype == BitmapOutput::PNG) {
-        raw_bmp.write_as_png(outstream);
-    } else if (pargs.ftype == BitmapOutput::JPEG) {
-        raw_bmp.write_as_jpeg(outstream);
-    }
+    // This selects output file type automatically to avoid code redundancy.
+    raw_bmp.write_to_file(outstream, pargs.ftype);
 
     done_printer();
 }

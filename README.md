@@ -14,7 +14,7 @@ The code is organized into a few directories: the include/ directory is public h
 Example programs are built in the main meson.build, and the headers and library are handled as subdirectories.
 
 ## Build Options ##
-I have 3 options: the "png" feature, which enables/disables libpng support (to enable writing PNG files), the "jpeg" feature, which enables/disables libjpeg/libjpeg-turbo support (which enables writing JPEG files), and the "turbojpeg" feature, which selects which JPEG implementation to use (preferring TurboJPEG 3 but falling back to libjpeg by default if it isn't available). I will use options to allow picking optional features (like image-format support).
+I have 4 options: the "png" feature, which enables/disables libpng support (to enable writing PNG files), the "jpeg" feature, which enables/disables libjpeg/libjpeg-turbo support (which enables writing JPEG files), the "turbojpeg" feature, which selects which JPEG implementation to use (preferring TurboJPEG 3 but falling back to libjpeg by default if it isn't available), and the "webp" feature, which enabled/disables lossless WebP support (via libwebp). I will use options to allow picking optional features (like image-format support).
 
 I highly suggest you supply a buildtype option or it will be painfully slow. By default, it uses "--buildtype debug" which provides no optimization options at all. I highly suggest using either the debugoptimized buildtype (equivalent to -O2 -g), the release buildtype (equivalent to -O3), or maybe minsize if you are space/cache-constrained (equivalent to -Os -g).
 

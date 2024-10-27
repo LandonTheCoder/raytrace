@@ -1,9 +1,21 @@
-project('raytrace', 'c', 'cpp', license: 'MIT', version: '2.0',
+project('raytrace', 'c', 'cpp', license: 'MIT', version: '2.1',
         meson_version: '>= 0.63.0',
-        default_options: ['cpp_std=c++20', 'default_library=static'])
+        default_options: ['cpp_std=c++20',
+                          'default_library=static',
+                          'libwebp:libwebp=enabled',
+                          'libwebp:libwebpmux=disabled',
+                          'libwebp:libwebpdemux=disabled',
+                          'libwebp:libwebpdecoder=disabled',
+                          'libwebp:cwebp=disabled',
+                          'libwebp:dwebp=disabled',
+                          'libwebp:webpinfo=disabled',
+                          'libwebp:webpmux=disabled'])
 # I put the default options up there because it doesn't seem to work otherwise.
 # I want to avoid DLLs because it makes it annoying to work with on Windows
 # because "DLL not found".
+# I have those default libwebp options to avoid building what I don't need
+# (the helper programs and most libraries). The necessary ones are libwebp
+# and libsharpyuv (dependency of libsharpyuv on newer versions).
 
 cc = meson.get_compiler('c')
 cxx = meson.get_compiler('cpp')
@@ -11,6 +23,8 @@ cxx = meson.get_compiler('cpp')
 conf_data = configuration_data()
 
 png_dep = dependency('libpng', required: get_option('png'), fallback: 'libpng')
+
+webp_dep = dependency('libwebp', required: get_option('webp'), fallback: 'libwebp')
 
 # This selects which JPEG writer implementation to use.
 
@@ -41,9 +55,11 @@ if not jpeg_dep.found()
 endif
 
 conf_data.set('ENABLE_PNG', png_dep.found(), description: 'Enable libpng support')
+conf_data.set('ENABLE_WEBP', webp_dep.found(), description: 'Enable libwebp support')
+
 # I generate config file for internal use in lib subdir
 
-deps = [png_dep, jpeg_dep]
+deps = [png_dep, jpeg_dep, webp_dep]
 
 # Files linked in which are OS-specific
 # Note: I can make them subdir-independent by using files()

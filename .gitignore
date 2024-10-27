@@ -5,3 +5,4 @@ subprojects/packagecache
 subprojects/libjpeg-turbo-*
 subprojects/libpng-*
 subprojects/zlib-*
+subprojects/libwebp-*

@@ -22,6 +22,7 @@ using rt::BitmapOutput;
 static void print_help(bool is_err, char *progname) {
     bool png_supported = bitmap::type_is_supported(BitmapOutput::PNG);
     bool jpeg_supported = bitmap::type_is_supported(BitmapOutput::JPEG);
+    bool webp_supported = bitmap::type_is_supported(BitmapOutput::WebP);
     char help_str[] =
 "\npositional arguments:\n"
 "  FILE                  Specifies file to output to (defaults to stdout if\n"
@@ -41,6 +42,8 @@ static void print_help(bool is_err, char *progname) {
         output << ", png";
     if (jpeg_supported)
         output << ", jpg";
+    if (webp_supported)
+        output << ", webp";
     output << ")\n";
 }
 
@@ -267,6 +270,13 @@ struct rt::args rt::parse_args(int argl, char **args) {
                         std::clog << "JPEG support not built in.\n";
                         exit(4);
                     }
+                } else if (sv.iends_with(".webp"sv)) {
+                    parsed_args.ftype = BitmapOutput::WebP;
+                    if (!bitmap::type_is_supported(BitmapOutput::WebP)) {
+                        print_help(true, args[0]);
+                        std::clog << "WebP support not built in.\n";
+                        exit(4);
+                    }
                 } else {
                     print_help(true, args[0]);
                     std::clog << "Unrecognized extension on file " << sv << '\n';
@@ -294,6 +304,13 @@ struct rt::args rt::parse_args(int argl, char **args) {
                 if (!bitmap::type_is_supported(BitmapOutput::JPEG)) {
                     print_help(true, args[0]);
                     std::clog << "JPEG support not built in.\n";
+                    exit(4);
+                }
+            } else if (type_name == "webp"sv) {
+                parsed_args.ftype = BitmapOutput::WebP;
+                if (!bitmap::type_is_supported(BitmapOutput::WebP)) {
+                    print_help(true, args[0]);
+                    std::clog << "WebP support not built in.\n";
                     exit(4);
                 }
             } else {

@@ -17,7 +17,7 @@ struct rgb {
 
 // To allow querying supported types at runtime. May be queried like rt::BitmapOutput::PNG.
 // Note: This cannot be implicitly converted to an int, it must have explicit static_cast<int>().
-enum class BitmapOutput { PPM, BMP, PNG, JPEG };
+enum class BitmapOutput { PPM, BMP, PNG, JPEG, WebP };
 
 /* Class for a RGB24 bitmap (R8G8B8).
  * Includes functions to serialize as a few different formats.
@@ -78,6 +78,9 @@ class bitmap {
 
     // Writes out bitmap to a JPEG (for settings, see bitmap.c++).
     void write_as_jpeg(std::ostream &out);
+
+    // Writes out bitmap to a lossless WebP image.
+    void write_as_webp(std::ostream &out);
 
     // Write to file (selected based on type specified)
     void write_to_file(std::ostream &out, BitmapOutput filetype);

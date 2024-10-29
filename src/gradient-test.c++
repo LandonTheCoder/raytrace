@@ -37,6 +37,18 @@ struct rgb color_vec3_to_rgb(const color &pixel_color) {
 static std::filesystem::path fpath;
 static std::ofstream out_file;
 
+// Handles termination by signal
+static void sig_exit_handler(int signum) {
+    // Note: This is because it seems I *have* to close before deleting on Windows.
+    out_file.close();
+    std::filesystem::remove(fpath);
+    // I'm not regarding SIGINT (Ctrl-C termination) as an error for now.
+    if (signum == SIGINT)
+        std::exit(0);
+    else
+        std::exit(signum + 128); // The Unix signal behavior
+}
+
 // This is like ppm-example but not hardcoded for ppm to stdout.
 int main(int argl, char **args) {
     // Testing quirks.
@@ -82,17 +94,9 @@ int main(int argl, char **args) {
                                    | std::ios_base::binary
                                    | std::ios_base::trunc);
         fpath = std::filesystem::path(pargs.fname);
-        // It doesn't let me use closures :(
         // I want to delete the empty file when I exit.
-        std::signal(SIGINT, [](int signum) -> void {
-            // Note: This is because it seems I *have* to close before deleting on Windows.
-            out_file.close();
-            std::filesystem::remove(fpath);
-            if (signum == SIGINT)
-                std::exit(0);
-            else
-                std::exit(128 + signum); // Unix default signal behavior
-        });
+        std::signal(SIGINT, sig_exit_handler);
+        std::signal(SIGTERM, sig_exit_handler);
     }
 
     // Image

@@ -46,6 +46,8 @@ The file has 500 samples per pixel, at 1200×675 px, and outputs in PPM format. 
  - release (-O3): 2 hours 9 minutes 6.97 seconds
  - minsize (-Os -g): 2 hours 14 minutes 6.38 seconds
 
+**Update**: I did some performance testing on a new system with more cores, and found that performance doesn't really scale beyond 4 cores/threads. As a matter of fact, performance using all threads is significantly worse than just using 4 threads, with the proportion of time spent in the kernel being *much* higher. (That new system is a desktop running Linux on an i5-12600K, testing the debugoptimized build.)
+
 ## Enhancements ##
 I have enhanced it so that it can take arguments specifying an output file, supporting PPM, BMP, and (optionally) PNG and JPEG.
 
